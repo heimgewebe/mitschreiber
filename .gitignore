@@ -1,0 +1,19 @@
+# Python / uv
+__pycache__/
+.venv/
+.uv/
+*.pyc
+
+# Runtime
+.runtime/
+
+# Env
+.env
+
+# Editors
+.DS_Store
+.idea/
+.vscode/
+
+# Fixtures generated
+fixtures/**/*.generated.*
