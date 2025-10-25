@@ -14,9 +14,7 @@
 use reqwest::StatusCode;
 
 fn base_url() -> String {
-    std::env::var("HAUSKI_TEST_BASE_URL")
-        .ok()
-        .unwrap_or_else(|| "http://127.0.0.1:8080".to_string())
+    std::env::var("HAUSKI_TEST_BASE_URL").unwrap_or_else(|_| "http://127.0.0.1:8080".to_string())
 }
 
 #[tokio::test]
@@ -39,7 +37,7 @@ async fn metrics_endpoint_exposes_prometheus_text() {
         .unwrap_or_default()
         .to_lowercase();
     assert!(
-        ctype.contains("text/plain"),
+        ctype.starts_with("text/plain"),
         "unexpected content-type: {}",
         ctype
     );
