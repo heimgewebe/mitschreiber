@@ -1,0 +1,165 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended"
+  ],
+  "dependencyDashboard": true,
+  "prConcurrentLimit": 2,
+  "labels": [
+    "deps",
+    "contracts-pin"
+  ],
+  "packageRules": [
+    {
+      "matchManagers": ["regex"],
+      "matchPackageNames": ["heimgewebe/metarepo contracts"],
+      "automerge": true,
+      "automergeType": "branch"
+    }
+  ],
+  "enabledManagers": [
+    "regex"
+  ],
+  "regexManagers": [
+    {
+      "description": "Pin metarepo contracts ref across workflows and docs",
+      "fileMatch": [
+        "^[.]github/workflows/validate[.]yml$",
+        "^docs/ci[.]md$",
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "  CONTRACTS_REF: (?<currentDigest>[0-9a-f]{40})"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "  CONTRACTS_REF: {{lookupResult.sha}}"
+    },
+    {
+      "description": "Pinned reusable JSONL validator reference",
+      "fileMatch": [
+        "^[.]github/workflows/validate[.]yml$",
+        "^docs/ci[.]md$",
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "    uses: heimgewebe/metarepo/[.]github/workflows/reusable-validate-jsonl[.]yml@(?<currentDigest>[0-9a-f]{40})"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@{{lookupResult.sha}}"
+    },
+    {
+      "description": "Pinned reusable CI workflow reference",
+      "fileMatch": [
+        "^[.]github/workflows/ci[.]yml$",
+        "^docs/ci[.]md$"
+      ],
+      "matchStrings": [
+        "    uses: heimgewebe/metarepo/[.]github/workflows/reusable-ci[.]yml@(?<currentDigest>[0-9a-f]{40})"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "    uses: heimgewebe/metarepo/.github/workflows/reusable-ci.yml@{{lookupResult.sha}}"
+    },
+    {
+      "description": "README commit note",
+      "fileMatch": [
+        "^README[.]md$"
+      ],
+      "matchStrings": [
+        "Reusable-Workflows und Schemas sind auf Commit `(?<currentDigest>[0-9a-f]{40})` gepinnt[.]"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "Reusable-Workflows und Schemas sind auf Commit `{{lookupResult.sha}}` gepinnt."
+    },
+    {
+      "description": "CI documentation intro pin note",
+      "fileMatch": [
+        "^docs/ci[.]md$"
+      ],
+      "matchStrings": [
+        "Dieses Repo nutzt die Reusable-Workflows aus dem [*][*]metarepo[*][*] [(]gepinnt auf Commit `(?<currentDigest>[0-9a-f]{40})`[)]."
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "Dieses Repo nutzt die Reusable-Workflows aus dem **metarepo** (gepinnt auf Commit `{{lookupResult.sha}}`)."
+    },
+    {
+      "description": "Contracts documentation intro pin note",
+      "fileMatch": [
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "Die Schemas liegen zentral im [*][*]metarepo[*][*] [(]gepinnt auf Commit `(?<currentDigest>[0-9a-f]{40})`[)]:"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "Die Schemas liegen zentral im **metarepo** (gepinnt auf Commit `{{lookupResult.sha}}`):"
+    },
+    {
+      "description": "Contracts table (state schema)",
+      "fileMatch": [
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "https://github[.]com/heimgewebe/metarepo/blob/(?<currentDigest>[0-9a-f]{40})/contracts/os[.]context[.]state[.]schema[.]json"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "https://github.com/heimgewebe/metarepo/blob/{{lookupResult.sha}}/contracts/os.context.state.schema.json"
+    },
+    {
+      "description": "Contracts table (embed schema)",
+      "fileMatch": [
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "https://github[.]com/heimgewebe/metarepo/blob/(?<currentDigest>[0-9a-f]{40})/contracts/os[.]context[.]text[.]embed[.]schema[.]json"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+      "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "https://github.com/heimgewebe/metarepo/blob/{{lookupResult.sha}}/contracts/os.context.text.embed.schema.json"
+    },
+    {
+      "description": "Contracts table (redacted schema)",
+      "fileMatch": [
+        "^docs/contracts[.]md$"
+      ],
+      "matchStrings": [
+        "https://github[.]com/heimgewebe/metarepo/blob/(?<currentDigest>[0-9a-f]{40})/contracts/os[.]context[.]text[.]redacted[.]schema[.]json"
+      ],
+      "depNameTemplate": "heimgewebe/metarepo contracts",
+      "datasourceTemplate": "github-tags",
+      "lookupNameTemplate": "heimgewebe/metarepo",
+        "extractVersionTemplate": "contracts-v(?<version>[0-9]+[.][0-9]+[.][0-9]+)",
+      "versioningTemplate": "semver",
+      "replaceStringTemplate": "https://github.com/heimgewebe/metarepo/blob/{{lookupResult.sha}}/contracts/os.context.text.redacted.schema.json"
+    }
+  ]
+}

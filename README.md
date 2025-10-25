@@ -3,7 +3,9 @@
 ![CI](https://github.com/heimgewebe/mitschreiber/actions/workflows/ci.yml/badge.svg)
 ![JSONL Validation](https://github.com/heimgewebe/mitschreiber/actions/workflows/validate.yml/badge.svg)
 
-On-device Kontext-Schreiber des **Heimgewebe-Ökosystems**.  
+Reusable-Workflows und Schemas sind auf Commit `78674c7159fb4c623cf3d65e978e4e5d6ca699bb` gepinnt.
+
+On-device Kontext-Schreiber des **Heimgewebe-Ökosystems**.
 Erfasst aktive Anwendungen, Fenster-Titel, Tipp-Intensität und – bei explizitem Opt-in – redigierte Text-Kontexte.  
 Keine Cloud, kein Rohtext, kein Tracking.
 
@@ -15,7 +17,7 @@ Keine Cloud, kein Rohtext, kein Tracking.
 |-------|---------------|
 | **Producer** | mitschreiber (Erfassung, Redaction, Embedding) |
 | **Consumer** | leitstand (Ingest), semantAH (Suche/Graph), heimlern (Policy-Feedback) |
-| **Contracts** | aus metarepo (`contracts-v1`) – `os.context.*` |
+| **Contracts** | aus metarepo (gepinnt auf `78674c7159fb4c623cf3d65e978e4e5d6ca699bb`) – `os.context.*` |
 
 ---
 
