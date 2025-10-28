@@ -24,7 +24,7 @@ just dev
 just emit:fixtures
 ```
 
-legt Beispiel-Events unter `fixtures/mitschreiber/` an.
+legt ein Beispiel-Embedding-Event unter `fixtures/mitschreiber/embed.demo.jsonl` an.
 
 ---
 

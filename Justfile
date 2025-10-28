@@ -5,9 +5,12 @@ dev:
 
 emit:fixtures:
     @mkdir -p fixtures/mitschreiber
-    @echo '{"ts":"2025-01-01T12:00:00Z","source":"os.context.state","session":"demo","app":"vscode","window":"README.md – mitschreiber","privacy":{"raw_retained":false}}' > fixtures/mitschreiber/state.demo.jsonl
-    @echo 'OK: fixtures/mitschreiber/* angelegt'
+    @cat <<'EOF' > fixtures/mitschreiber/embed.demo.jsonl
+{"ts":"2025-01-01T12:00:00Z","source":"os.context.text.embed","session":"demo","app":"vscode","window":"README.md – mitschreiber","keyphrases":["mitschreiber","privacy","context"],"embedding":[0.012,-0.034,0.056,0.078,0.031,-0.045,0.022,0.007],"hash_id":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","privacy":{"raw_retained":false},"meta":{"model":"demo-embedding"}}
+EOF
+    @echo 'OK: fixtures/mitschreiber/embed.demo.jsonl angelegt'
 
 validate:fixtures:
-    @echo "→ Prüfe fixtures via reusable-validate-jsonl (GitHub CI). Lokal kannst du ajv-cli nutzen:"
-    @echo "  ajv validate --spec=draft2020 -s contracts/os.context.text.embed.schema.json -d fixtures/mitschreiber/*.jsonl || true"
+    @echo "→ Prüfe fixtures via reusable-validate-jsonl (GitHub CI). Lokal (ohne vendorte Schemas):"
+    @echo "  ajv validate --spec=draft2020 -s https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json -d fixtures/mitschreiber/embed*.jsonl || true"
+    @echo "  # Offline? Schema vendoren und Pfad im Befehl anpassen."
