@@ -83,9 +83,10 @@ Details siehe [`docs/privacy.md`](docs/privacy.md)
 
 ## Entwicklung & CI
 
-* [`docs/runbook.md`](docs/runbook.md) – Alltagsablauf
+* [`docs/runbook.md`](docs/runbook.md) – Alltagsablauf (inkl. Fixture-Anleitung)
 * [`docs/devcontainer.md`](docs/devcontainer.md) – Setup-Anleitung
 * [`docs/ci.md`](docs/ci.md) – Validierung & Reusable-Workflows
+* Beispiel-Event: `fixtures/mitschreiber/embed.demo.jsonl`
 
 ---
 
