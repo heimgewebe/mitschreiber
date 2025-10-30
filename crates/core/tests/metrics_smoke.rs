@@ -11,7 +11,9 @@
 //! Erwartung: Ein laufender hausKI-Server (z. B. `hauski-cli serve`) exponiert
 //! Prometheus-Metriken unter GET /metrics (Content-Type text/plain; version=0.0.4).
 
-use reqwest::StatusCode;
+use http::StatusCode;
+use reqwest::header::{ACCEPT, CONTENT_TYPE};
+use std::time::Duration;
 
 fn base_url() -> String {
     std::env::var("HAUSKI_TEST_BASE_URL")
@@ -23,8 +25,13 @@ fn base_url() -> String {
 #[ignore] // nur on-demand ausführen
 async fn metrics_endpoint_exposes_prometheus_text() {
     let url = format!("{}/metrics", base_url().trim_end_matches('/'));
-    let resp = reqwest::Client::new()
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(10))
+        .build()
+        .expect("failed to build reqwest client");
+    let resp = client
         .get(&url)
+        .header(ACCEPT, "text/plain; version=0.0.4")
         .send()
         .await
         .expect("request to /metrics failed");
@@ -34,23 +41,28 @@ async fn metrics_endpoint_exposes_prometheus_text() {
     // Content-Type sollte Prometheus-Textformat sein
     let ctype = resp
         .headers()
-        .get(reqwest::header::CONTENT_TYPE)
+        .get(CONTENT_TYPE)
         .and_then(|v| v.to_str().ok())
         .unwrap_or_default()
         .to_lowercase();
     assert!(
-        ctype.contains("text/plain"),
+        ctype.starts_with("text/plain") && ctype.contains("version=0.0.4"),
         "unexpected content-type: {}",
         ctype
     );
 
     let body = resp.text().await.expect("reading response body failed");
     // Heuristik: Prometheus-Textformat enthält i. d. R. HELP/TYPE-Zeilen
+    let preview = {
+        let bytes = body.as_bytes();
+        let len = bytes.len().min(64);
+        format!("{:?}", &bytes[..len])
+    };
     assert!(
         body.contains("# HELP") || body.contains("# TYPE"),
-        "unexpected /metrics payload (length={}): first bytes: {:?}",
+        "unexpected /metrics payload (length={}): first bytes: {}",
         body.len(),
-        &body.as_bytes().get(0..64)
+        preview
     );
 }
 
