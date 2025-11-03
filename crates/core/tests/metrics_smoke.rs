@@ -65,4 +65,3 @@ async fn metrics_endpoint_exposes_prometheus_text() {
         preview
     );
 }
-

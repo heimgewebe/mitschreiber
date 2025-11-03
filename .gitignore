@@ -17,3 +17,10 @@ __pycache__/
 
 # Fixtures generated
 fixtures/**/*.generated.*
+
+# Rust
+target/
+Cargo.lock
+
+# Rust
+/target
