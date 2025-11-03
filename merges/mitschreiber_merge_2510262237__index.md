@@ -1,0 +1,218 @@
+# Ordner-Merge: mitschreiber
+
+**Zeitpunkt:** 2025-10-26 22:37
+**Quelle:** `/home/alex/repos/mitschreiber`
+**Dateien (gefunden):** 20
+**Gesamtgröße (roh):** 28 KB
+
+**Exclude:** ['.gitignore']
+
+## 📁 Struktur
+
+- mitschreiber/
+  - .env.example
+  - .gitignore
+  - .hauski-reports
+  - Justfile
+  - README.md
+  - renovate.json
+  - docs/
+    - architecture.md
+    - ci.md
+    - contracts.md
+    - devcontainer.md
+    - privacy.md
+    - runbook.md
+    - adrs/
+      - ADR-0001-toolchain-strategy.md
+    - contracts/
+      - index.md
+      - os-context.md
+  - .github/
+    - workflows/
+      - ci.yml
+      - validate.yml
+  - fixtures/
+    - mitschreiber/
+      - .gitkeep
+      - state.demo.jsonl
+  - .git/
+    - FETCH_HEAD
+    - HEAD
+    - ORIG_HEAD
+    - config
+    - index
+    - hooks/
+      - pre-push
+    - refs/
+      - remotes/
+        - origin/
+          - improve-metrics-smoke-test
+          - main
+          - codex/
+            - add-complete-documentation-for-mitschreiber
+            - locate-errors-in-the-code
+      - tags/
+      - heads/
+        - main
+        - backup/
+          - main-20251023-114030
+          - main-20251025-233734
+    - logs/
+      - HEAD
+      - refs/
+        - remotes/
+          - origin/
+            - improve-metrics-smoke-test
+            - main
+            - codex/
+              - add-complete-documentation-for-mitschreiber
+              - locate-errors-in-the-code
+        - heads/
+          - main
+          - backup/
+            - main-20251023-114030
+            - main-20251025-233734
+    - objects/
+      - c7/
+        - 3590c0142698b6226673cb3c9bc90673ef4a20
+      - c9/
+        - eeddc9accfec76915b1f9d3a8af2738b276b1d
+        - f0254e0b990ad0eaf4f0be2932992f2b384114
+      - 23/
+        - 9915487e37fd133d0e2bfdd152d327048cd10f
+      - 72/
+        - 93d7cafd705ca27a25728ab60d002adfa75cc4
+      - 0e/
+        - bf387b70fdaa478b7394a6cdf2561b4740536d
+      - 54/
+        - abf6d492868056734102733b1d61e0b2817756
+      - 4f/
+        - cf938346966f0a76913b5917a6758b79913a05
+      - fd/
+        - 3982479d01ca5b49ad510382398c031a7b6a77
+        - b8bdb61264e1550065b5b9c61f1e98582e8e3f
+      - 8f/
+        - 9988e4ff71417ff51883f61752fe83a8832cf0
+      - 29/
+        - 5beb940fe596d10d1a447657487640aa11bd1c
+      - 14/
+        - 97e66483709608ed4f959c8e03ebbaf1f3e49a
+      - 77/
+        - d124ddddc3ccf1f449bf5b98c0d28c6c68f08e
+      - 6a/
+        - a24c074aa6c1c765ed1e30949c22d4d0b3d46b
+      - c6/
+        - 722eca9ac6e925b1a406cd9829e67ee1ae31d3
+      - ab/
+        - 0cf283e46435bbdf60d3cfc7c867c4cab8a076
+      - 57/
+        - e83bf85e398fa33b955485b0bf4ae7968c652c
+      - pack/
+      - 9b/
+        - d0d055f6649375a6915acc5dce5d2ec1e4dcc1
+      - 92/
+        - df1e77fda84e0379f7fe0b18eb80c7ec829c11
+      - e9/
+        - 2041b7a61cd69692ee10ed680cd281e138f507
+      - 2e/
+        - ba61a9882d30b58b0e9d93b59e97b4b03fc8e6
+      - c4/
+        - a2b0b86c2fe7149eaa03982e633da2a8e5149f
+      - e6/
+        - 9de29bb2d1d6434b8b29ae775ad8c2e48c5391
+      - 5b/
+        - 4c4beccbb8976a475d1eedbd4f1e091ea197f2
+      - 8b/
+        - 137891791fe96927ad78e64b0aad7bded08bdc
+        - a94824d9c81b44a59c7da5622a110197fd7597
+      - fe/
+        - f6bc47dfa70c53725e6b923621f30b4e313031
+      - 7a/
+        - 1e3d7f415eb157ceac2cc65d1d86dafca5b6a8
+      - 28/
+        - 014c6067e0a6188425c47a13a057924b1c20aa
+      - fb/
+        - 16d55a05784284a5fa9526f465ae3942672dfd
+      - 1b/
+        - 59a707269ac362c64b1c8e53a5994d4222c88b
+      - 69/
+        - 80febee42e7ce9051f3a9ab804981abc92a5f7
+      - 37/
+        - 61973e3408bfc31b62666b6bf30618afebefa6
+      - 31/
+        - 1c1c861c0b4a692922ddd16f8d428d063d0872
+      - ce/
+        - a7bcf4af2974622738a9374fe9ddc6dcfa39a6
+      - b3/
+        - d771367e52411f2aaf4ea61a1b6bae3c2bd6af
+      - 44/
+        - 0c40db31f9790a466bc41ebaf9f6722bf67abe
+      - 81/
+        - 84f5722f0842ce5cd80aa6b8f5b6fd3eab162d
+      - 6e/
+        - 46cc6da4932db411399dc2fcb30ddc1d425bae
+      - 10/
+        - b6f9920be55b95ab2ddbf6f8627d1c1873b72a
+      - e1/
+        - f4b38a722fd6e6eee061d66a99f97081ce70cd
+      - b4/
+        - 86469df09c72c7e6c9dc1418a8867b99c2a90e
+      - ae/
+        - 19a6dac5c3b360d86c1bbd647ff2446df86142
+        - 5aa810b9ee52f8598886155b77628807cfb605
+      - dc/
+        - 0d25e914f9661efda90acb3a16f65a7188f767
+      - 99/
+        - 80106cee070a250251188410e1299fb3ad5092
+      - 7f/
+        - 621189c1961b90dc39c7ae8a4179f3e36f2665
+      - 25/
+        - a6f90eb7db2b0ddad00e694e87003e8d09d324
+      - f4/
+        - d4c5759bd7df89a21addc17fdb24315b2e1225
+      - db/
+        - 10ea9abd6da76a09d261f96e04066786f2ab69
+      - info/
+      - 86/
+        - baaa8828944f3cec499b5ae929a113406e7a56
+      - 09/
+        - 9bdc054b04052425b0086d504d2a8c5b5ddd31
+      - cf/
+        - 08441a53b2e38544841dec8c69507cf184b948
+      - ef/
+        - 5d6f120a37827d354b8a2869bbbbdcd80336c9
+      - 7e/
+        - 9c8efdf93e3dfc2a317765c01e1e0f611de411
+        - d2607b5066a7ffccdd50c63100222a9b663d22
+  - merges/
+    - mitschreiber_merge_2510262237__index.md
+  - crates/
+    - core/
+      - tests/
+        - metrics_smoke.rs
+  - contracts/
+    - os.context.text.embed.schema.json
+
+## 📦 Inhalte (Chunks)
+
+- .env.example → `mitschreiber_merge_2510262237__root.md`
+- .gitignore → `mitschreiber_merge_2510262237__root.md`
+- Justfile → `mitschreiber_merge_2510262237__root.md`
+- README.md → `mitschreiber_merge_2510262237__root.md`
+- renovate.json → `mitschreiber_merge_2510262237__root.md`
+- docs/architecture.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/ci.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/contracts.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/devcontainer.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/privacy.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/runbook.md → `mitschreiber_merge_2510262237__docs.md`
+- docs/adrs/ADR-0001-toolchain-strategy.md → `mitschreiber_merge_2510262237__docs_adrs.md`
+- docs/contracts/index.md → `mitschreiber_merge_2510262237__docs_contracts.md`
+- docs/contracts/os-context.md → `mitschreiber_merge_2510262237__docs_contracts.md`
+- .github/workflows/ci.yml → `mitschreiber_merge_2510262237__.github_workflows.md`
+- .github/workflows/validate.yml → `mitschreiber_merge_2510262237__.github_workflows.md`
+- fixtures/mitschreiber/.gitkeep → `mitschreiber_merge_2510262237__fixtures_mitschreiber.md`
+- fixtures/mitschreiber/state.demo.jsonl → `mitschreiber_merge_2510262237__fixtures_mitschreiber.md`
+- crates/core/tests/metrics_smoke.rs → `mitschreiber_merge_2510262237__crates_core_tests.md`
+- contracts/os.context.text.embed.schema.json → `mitschreiber_merge_2510262237__contracts.md`
