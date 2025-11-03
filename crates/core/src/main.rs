@@ -1,0 +1,1 @@
+fn main() { println!("hausKI core placeholder"); }
