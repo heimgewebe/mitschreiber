@@ -67,6 +67,7 @@
     },
     "meta": {
       "type": "object",
+      "additionalProperties": true,
       "description": "Optionale Metadaten (z. B. Modellbezeichner)."
     }
   },
