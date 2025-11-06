@@ -12,5 +12,5 @@ EOF
 
 validate:fixtures:
     @echo "→ Prüfe fixtures via reusable-validate-jsonl (GitHub CI). Lokal (ohne vendorte Schemas):"
-    @echo "  ajv validate --spec=draft2020 -s https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json -d fixtures/mitschreiber/embed*.jsonl || true"
+    @echo "  ajv validate --spec=draft2020 -s contracts/os.context.text.embed.schema.json -d fixtures/mitschreiber/embed*.jsonl || true"
     @echo "  # Offline? Schema vendoren und Pfad im Befehl anpassen."
