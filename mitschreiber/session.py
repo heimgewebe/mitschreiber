@@ -169,5 +169,6 @@ def start_interactive_session(cfg: SessionConfig) -> None:
         try:
             (SESS_DIR / "active.json").unlink(missing_ok=True)
         except Exception:
+            # Ignore errors during cleanup; file may not exist or be locked
             pass
         print("session stopped.")
