@@ -18,7 +18,7 @@ def _append_jsonl(path: Path, obj: dict):
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(path, "a", encoding="utf-8") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(json.dumps(obj, ensure_ascii=False) + "\n")
+        f.write(json.dumps(obj, ensure_ascii=False, separators=(',', ':')) + "\n")
         fcntl.flock(f, fcntl.LOCK_UN)
 
 @dataclass
