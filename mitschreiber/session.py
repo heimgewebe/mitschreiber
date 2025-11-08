@@ -6,14 +6,15 @@ import signal
 import time
 import uuid
 import fcntl
+import math
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, Any
+from typing import Optional, Dict, Any
 
 from .paths import WAL_DIR, SESS_DIR
-# Rust-Bindings (pyo3): in src/lib.rs als _mitschreiber exportiert
-from mitschreiber._mitschreiber import start_session as rs_start, stop_session as rs_stop, poll_state as rs_poll
+# Rust-Bindings (pyo3): in src/lib.rs as _mitschreiber exported, imported here as mitschreiber due to packaging
+from mitschreiber import start_session as rs_start, stop_session as rs_stop, poll_state as rs_poll
 
 ISO = "%Y-%m-%dT%H:%M:%S.%fZ"
 
@@ -35,7 +36,9 @@ class SessionConfig:
     clipboard_allowed: bool = False
     screenshots_allowed: bool = False
     poll_interval_ms: int = 500
-    embeddings_enabled: bool = False  # hook für Schritt 3
+    embeddings_enabled: bool = False  # Schritt 3
+    embed_min_interval_s: float = 10.0
+    embed_min_chars: int = 12
 
 @dataclass
 class SessionHandle:
@@ -97,6 +100,18 @@ def run_loop(h: SessionHandle) -> None:
     # kleiner Takt-Puffer
     poll_sleep = max(h.cfg.poll_interval_ms, 50) / 1000.0
 
+    # Embeddings evtl. per ENV aktivieren (Fallback, wenn CLI-Flag noch fehlt)
+    if not h.cfg.embeddings_enabled:
+        h.cfg.embeddings_enabled = os.getenv("MITSCHREIBER_EMBED", "0").lower() in ("1", "true", "yes")
+
+    # Embedding-Guards
+    last_embed_hash: Optional[str] = None
+    last_embed_ts: float = 0.0
+
+    # Lazy import (nur wenn benötigt)
+    if h.cfg.embeddings_enabled:
+        from .embed import build_embed_event
+
     try:
         while not _stop["flag"]:
             # Die Rust-Funktion liefert Option[str] (JSON-String) oder None
@@ -121,10 +136,29 @@ def run_loop(h: SessionHandle) -> None:
                 }
                 append_jsonl(h.wal_path, event)
 
-                # Embeddings-Hook (Schritt 3 aktiviert dies)
+                # Embeddings (opt-in)
                 if h.cfg.embeddings_enabled:
-                    # only prepared here – implementation follows in step 3
-                    pass
+                    app = state.get("app", "") or ""
+                    window = state.get("window", "") or ""
+                    clip = state.get("clipboard")
+                    chunks = [window.strip()]
+                    if clip and isinstance(clip, str):
+                        chunks.append(clip.strip())
+                    text = "\n\n".join([c for c in chunks if c])
+
+                    if text and len(text) >= h.cfg.embed_min_chars:
+                        now_t = time.monotonic()
+                        if (now_t - last_embed_ts) >= h.cfg.embed_min_interval_s:
+                            embed_evt, text_hash = build_embed_event(
+                                text=text,
+                                session=h.id,
+                                app=app,
+                                window=window,
+                            )
+                            if text_hash != last_embed_hash:
+                                append_jsonl(h.wal_path, embed_evt)
+                                last_embed_hash = text_hash
+                                last_embed_ts = now_t
 
             time.sleep(poll_sleep)
     finally:

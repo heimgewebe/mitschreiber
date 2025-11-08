@@ -5,13 +5,13 @@ build-backend = "maturin"
 [project]
 name = "mitschreiber"
 version = "0.1.0"
-description = "On-device context sensor for Heimgewebe ecosystem"
+description = "On-device context sampler & embedder"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-embed = ["sentence-transformers>=3.0.0"]
+embed = ["sentence-transformers>=2.6.1"]
 
 [project.scripts]
 mitschreiber = "mitschreiber.cli:main"
