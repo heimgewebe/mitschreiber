@@ -23,7 +23,8 @@ def cmd_start(ns: argparse.Namespace) -> int:
 def cmd_stop(_ns: argparse.Namespace) -> int:
     # Status lesen, falls aktiv
     if STATUS_FILE.exists():
-        st = json.loads(STATUS_FILE.read_text(encoding="utf-8") or "{}")
+        content = STATUS_FILE.read_text(encoding="utf-8")
+        st = json.loads(content if content.strip() else "{}")
         sid = st.get("session") if st.get("active") else st.get("last_session")
         if sid:
             sess_stop(sid)
