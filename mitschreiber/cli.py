@@ -83,8 +83,8 @@ def cmd_stop(_args: argparse.Namespace) -> int:
             pass
     try:
         ACTIVE_FILE.unlink(missing_ok=True)
-    except Exception:
-        pass
+    except Exception as e:
+        print(f"mitschreiber: warning – could not remove active file {ACTIVE_FILE}: {e!r}")
     print("mitschreiber: stopped.")
     return 0
 
