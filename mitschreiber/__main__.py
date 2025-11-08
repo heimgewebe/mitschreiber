@@ -1,5 +1,5 @@
-def main():
-    print("mitschreiber placeholder module – implement core logic here")
+# mitschreiber/__main__.py
+from .cli import main
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())

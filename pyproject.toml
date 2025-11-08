@@ -10,6 +10,12 @@ readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+embed = ["sentence-transformers>=3.0.0"]
+
+[project.scripts]
+mitschreiber = "mitschreiber.cli:main"
+
 [tool.maturin]
 manifest-path = "Cargo.toml"
 module-name = "mitschreiber._mitschreiber"
