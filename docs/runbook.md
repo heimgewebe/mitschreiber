@@ -106,7 +106,6 @@ Tipp: Für den Start-Hotkey ein separates Terminalprofil nutzen, damit die Sessi
 • WAL-Einträge: `.runtime/wal/`
 • Fehlerdiagnose: `just doctor` (geplant)
 
-•
 
 ## Typische Stolpersteine
 
