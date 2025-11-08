@@ -13,13 +13,9 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 from .paths import WAL_DIR, SESS_DIR
+from .util import now_iso
 # Rust-Bindings (pyo3): in src/lib.rs as _mitschreiber exported, imported here as mitschreiber due to packaging
 from mitschreiber import start_session as rs_start, stop_session as rs_stop, poll_state as rs_poll
-
-ISO = "%Y-%m-%dT%H:%M:%S.%fZ"
-
-def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime(ISO)
 
 def append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -158,7 +154,7 @@ def run_loop(h: SessionHandle) -> None:
                             if text_hash != last_embed_hash:
                                 append_jsonl(h.wal_path, embed_evt)
                                 last_embed_hash = text_hash
-                                last_embed_ts = now_t
+                            last_embed_ts = now_t
 
             time.sleep(poll_sleep)
     finally:
