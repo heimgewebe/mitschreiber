@@ -154,7 +154,7 @@ def run_loop(h: SessionHandle) -> None:
                             if text_hash != last_embed_hash:
                                 append_jsonl(h.wal_path, embed_evt)
                                 last_embed_hash = text_hash
-                            last_embed_ts = now_t
+                                last_embed_ts = now_t
 
             time.sleep(poll_sleep)
     finally:
