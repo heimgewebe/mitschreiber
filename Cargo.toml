@@ -1,0 +1,19 @@
+[package]
+name = "mitschreiber"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "mitschreiber"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.20.0", features = ["extension-module", "auto-initialize"] }
+mitschreiber-sampler = { path = "crates/mitschreiber-sampler" }
+
+[workspace]
+members = [
+    "crates/core",
+    "crates/mitschreiber-sampler",
+]
+resolver = "2"
