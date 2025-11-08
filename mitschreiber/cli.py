@@ -67,7 +67,11 @@ def cmd_stop(_args: argparse.Namespace) -> int:
         return 0
 
     print(f"mitschreiber: stopping session {sid} (pid={pid}) …")
-    os.kill(pid, signal.SIGTERM)
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        # Process already exited
+        pass
     # wait a bit
     for _ in range(20):
         if not _pid_alive(pid):
