@@ -20,8 +20,10 @@ def append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
     line = json.dumps(obj, ensure_ascii=False, separators=(",", ":"))
     with open(path, "a", encoding="utf-8") as f:
         fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(line + "\n")
-        fcntl.flock(f, fcntl.LOCK_UN)
+        try:
+            f.write(line + "\n")
+        finally:
+            fcntl.flock(f, fcntl.LOCK_UN)
 
 @dataclass
 class SessionConfig:
