@@ -9,7 +9,7 @@ import fcntl
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 
 from .paths import WAL_DIR, SESS_DIR
 # Rust-Bindings (pyo3): in src/lib.rs als _mitschreiber exportiert
