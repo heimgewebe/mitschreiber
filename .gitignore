@@ -3,6 +3,7 @@ __pycache__/
 .venv/
 .uv/
 *.pyc
+*.so
 
 # Runtime
 .runtime/

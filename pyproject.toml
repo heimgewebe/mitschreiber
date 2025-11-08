@@ -8,9 +8,11 @@ version = "0.1.0"
 description = "On-device context sensor for Heimgewebe ecosystem"
 readme = "README.md"
 requires-python = ">=3.11"
+dependencies = []
 
 [tool.maturin]
-manifest-path = "crates/core/Cargo.toml"
+manifest-path = "Cargo.toml"
+module-name = "mitschreiber._mitschreiber"
 
 [tool.uv]
 dev-dependencies = ["pytest", "requests"]
