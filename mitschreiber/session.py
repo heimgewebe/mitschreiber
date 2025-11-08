@@ -1,6 +1,11 @@
 # mitschreiber/session.py
 from __future__ import annotations
-import json, os, signal, time, uuid, fcntl
+import json
+import os
+import signal
+import time
+import uuid
+import fcntl
 from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
