@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Optional, Dict, Any
 
 from .paths import WAL_DIR, SESS_DIR
-# Rust-Bindings (pyo3): in src/lib.rs als _mitschreiber exportiert
+# Rust-Bindings (pyo3): in src/lib.rs as _mitschreiber exported
 from mitschreiber import start_session as rs_start, stop_session as rs_stop, poll_state as rs_poll
 
 ISO = "%Y-%m-%dT%H:%M:%S.%fZ"
