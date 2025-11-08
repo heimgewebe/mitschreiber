@@ -1,7 +1,6 @@
 # mitschreiber/cli.py
 from __future__ import annotations
 import argparse, json, sys
-from pathlib import Path
 from .session import SessionConfig, start as sess_start, run_loop, stop as sess_stop, STATUS_FILE
 
 def cmd_start(ns: argparse.Namespace) -> int:
