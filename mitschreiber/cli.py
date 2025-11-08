@@ -80,7 +80,7 @@ def cmd_status(_args: argparse.Namespace) -> int:
     STATE_ROOT.mkdir(parents=True, exist_ok=True)
     if not ACTIVE_FILE.exists():
         print("No active session.")
-        return
+        return 0
     try:
         active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
     except Exception as e:
