@@ -93,6 +93,7 @@ def _remove_silent(path: Path):
     try:
         path.unlink()
     except FileNotFoundError:
+        # File does not exist; nothing to remove. Exception intentionally ignored.
         pass
 
 def run_loop(h: SessionHandle) -> None:
