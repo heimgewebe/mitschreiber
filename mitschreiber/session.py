@@ -71,11 +71,7 @@ def start(cfg: SessionConfig) -> SessionHandle:
 
 
 def stop(session_id: str) -> None:
-    try:
-        rs_stop(session_id)
-    finally:
-        # Platz für spätere lokale Aufräumarbeiten
-        pass
+    rs_stop(session_id)
 
 
 def run_loop(h: SessionHandle) -> None:

@@ -21,6 +21,24 @@ def _pid_alive(pid: int) -> bool:
         # Process exists but different owner/session; treat as alive.
         return True
 
+def _is_mitschreiber_proc(pid: int) -> bool:
+    """
+    Checks if the process is likely a mitschreiber instance.
+    This is a safeguard against killing random processes.
+    """
+    if not _pid_alive(pid):
+        return False
+    try:
+        with open(f"/proc/{pid}/cmdline", "r", encoding="utf-8") as f:
+            cmdline = f.read()
+            return "mitschreiber" in cmdline
+    except FileNotFoundError:
+        # Process vanished or not on a procfs system.
+        return False
+    except Exception:
+        # Broad catch-all for permission errors or other issues.
+        return False
+
 def cmd_start(args: argparse.Namespace) -> int:
     SESS_DIR.mkdir(parents=True, exist_ok=True)
     WAL_DIR.mkdir(parents=True, exist_ok=True)
@@ -64,6 +82,10 @@ def cmd_stop(_args: argparse.Namespace) -> int:
         except Exception:
             pass
         return 0
+
+    if not _is_mitschreiber_proc(pid):
+        print(f"mitschreiber: process with pid {pid} is not a mitschreiber instance – not stopping")
+        return 1
 
     print(f"mitschreiber: stopping session {sid} (pid={pid}) …")
     try:
