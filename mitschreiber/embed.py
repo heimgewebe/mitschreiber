@@ -5,6 +5,7 @@ import re
 from functools import lru_cache
 from typing import List, Tuple, Dict, Any
 from datetime import datetime, timezone
+from .util import now_iso
 
 # Soft-Dependency: sentence-transformers
 DEFAULT_MODEL = os.getenv("MITSCHREIBER_EMBED_MODEL", "sentence-transformers/all-MiniLM-L6-v2")
@@ -15,8 +16,6 @@ STOPWORDS = {
     "mit","und","oder","der","die","das","ein","eine","ist",
 }
 
-def now_iso() -> str:
-    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
 
 @lru_cache(maxsize=1)
 def _load_model():
