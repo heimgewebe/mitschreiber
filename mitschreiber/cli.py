@@ -70,6 +70,7 @@ def cmd_stop(_args: argparse.Namespace) -> int:
         try:
             ACTIVE_FILE.unlink()
         except FileNotFoundError:
+            # File already absent; nothing to do.
             pass
         return
     os.kill(pid, signal.SIGTERM)
