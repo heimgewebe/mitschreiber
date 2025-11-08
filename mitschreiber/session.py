@@ -19,7 +19,7 @@ from mitschreiber import start_session as rs_start, stop_session as rs_stop, pol
 ISO = "%Y-%m-%dT%H:%M:%S.%fZ"
 
 def now_iso() -> str:
-     return datetime.now(timezone.utc).strftime(ISO)
+    return datetime.now(timezone.utc).strftime(ISO)
 
 def append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
