@@ -123,7 +123,7 @@ def run_loop(h: SessionHandle) -> None:
 
                 # Embeddings-Hook (Schritt 3 aktiviert dies)
                 if h.cfg.embeddings_enabled:
-                    # hier nur vorbereitet – implementierung folgt in Schritt 3
+                    # only prepared here – implementation follows in step 3
                     pass
 
             time.sleep(poll_sleep)
