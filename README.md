@@ -2,6 +2,8 @@
 
 ![CI](https://github.com/heimgewebe/mitschreiber/actions/workflows/ci.yml/badge.svg)
 ![JSONL Validation](https://github.com/heimgewebe/mitschreiber/actions/workflows/validate.yml/badge.svg)
+[![Status: Prototype](https://img.shields.io/badge/status-prototype-yellow.svg)](./docs/runbook.md)
+[![Platform: Pop!_OS](https://img.shields.io/badge/platform-Pop!__OS%20%2F%20Linux-blue)](./docs/runbook.md)
 
 Reusable-Workflows und Schemas sind auf Commit `78674c7159fb4c623cf3d65e978e4e5d6ca699bb` gepinnt.
 
@@ -64,6 +66,7 @@ just dev
 
 ## Privacy-Prinzipien
 
+(Opt-in/RAW möglich; siehe [`docs/privacy.md`](docs/privacy.md) und Runbook → CLI Start/Stop)
 1. **Keine Speicherung von Rohtext**
 2. **Redaction & Dropping vor Persistenz**
 3. **TTL ≤ 60 s für flüchtige Daten**
@@ -83,7 +86,7 @@ Details siehe [`docs/privacy.md`](docs/privacy.md)
 
 ## Entwicklung & CI
 
-* [`docs/runbook.md`](docs/runbook.md) – Alltagsablauf (inkl. Fixture-Anleitung)
+* [`docs/runbook.md`](docs/runbook.md) – Alltagsablauf (CLI Start/Stop/Status, Hotkey, Pfade, Fixtures)
 * [`docs/devcontainer.md`](docs/devcontainer.md) – Setup-Anleitung
 * [`docs/ci.md`](docs/ci.md) – Validierung & Reusable-Workflows
 * Beispiel-Event: `fixtures/mitschreiber/embed.demo.jsonl`
