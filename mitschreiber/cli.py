@@ -58,23 +58,25 @@ def cmd_stop(_args: argparse.Namespace) -> int:
         active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
     except FileNotFoundError:
         print("No active session.")
-        return
+        return 1
     pid = active.get("pid")
     if not isinstance(pid, int):
         print("Active session file is corrupt (missing pid).")
-        return
+        return 1
+
+    if not _is_mitschreiber_proc(pid):
+        print(f"PID {pid} does not appear to be a mitschreiber process. Stale session file?")
+        return 1
+
     try:
-        os.kill(pid, 0)  # probe
+        os.kill(pid, signal.SIGTERM)
+        print(f"Sent SIGTERM to session pid={pid}.")
     except ProcessLookupError:
         print("No running process for recorded session; clearing active status.")
         try:
             ACTIVE_FILE.unlink()
         except FileNotFoundError:
-            # File already absent; nothing to do.
             pass
-        return
-    os.kill(pid, signal.SIGTERM)
-    print(f"Sent SIGTERM to session pid={pid}.")
     return 0
 
 def cmd_status(_args: argparse.Namespace) -> int:
@@ -86,7 +88,7 @@ def cmd_status(_args: argparse.Namespace) -> int:
         active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
     except Exception as e:
         print(f"Failed to read active status: {e}")
-        return
+        return 1
     pid = active.get("pid")
     running = False
     if isinstance(pid, int):
