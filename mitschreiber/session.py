@@ -7,6 +7,7 @@ import signal
 import time
 import uuid
 import fcntl
+import hashlib
 from dataclasses import dataclass, asdict
 from datetime import timezone, datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from typing import Optional, Dict, Any
 
 from .paths import WAL_DIR, SESS_DIR
 from .util import now_iso  # Single Source of Truth für Zeitstempel
+from .embedding import build_embed_record
 
 # Rust-Bindings (pyo3): in src/lib.rs als _mitschreiber exportiert
 # und über das Python-Paket als "mitschreiber" importierbar
@@ -22,6 +24,11 @@ from mitschreiber import (
     stop_session as rs_stop,
     poll_state as rs_poll,
 )
+
+STATE_ROOT = Path.home()/".local/share/mitschreiber"
+SESSIONS = STATE_ROOT/"sessions"
+SESSIONS.mkdir(parents=True, exist_ok=True)
+ACTIVE_FILE = STATE_ROOT/"active.json"
 
 
 def append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
@@ -73,6 +80,20 @@ def start(cfg: SessionConfig) -> SessionHandle:
 def stop(session_id: str) -> None:
     rs_stop(session_id)
 
+def _text_fingerprint(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+def _write_json(path: Path, obj: Dict[str, Any]):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(path.suffix + ".tmp")
+    tmp.write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    tmp.replace(path)
+
+def _remove_silent(path: Path):
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
 
 def run_loop(h: SessionHandle) -> None:
     _stop = {"flag": False}
@@ -95,12 +116,8 @@ def run_loop(h: SessionHandle) -> None:
         )
 
     # Embedding-Guards
-    last_embed_hash: Optional[str] = None
-    last_embed_ts: float = 0.0
-
-    # Lazy import (nur wenn benötigt)
-    if h.cfg.embeddings_enabled:
-        from .embed import build_embed_event  # noqa: WPS433 (local import by design)
+    last_window: Optional[str] = None
+    last_clip_fp: Optional[str] = None
 
     try:
         while not _stop["flag"]:
@@ -134,24 +151,31 @@ def run_loop(h: SessionHandle) -> None:
                     app = state.get("app", "") or ""
                     window = state.get("window", "") or ""
                     clip = state.get("clipboard")
-                    chunks = [window.strip()]
-                    if clip and isinstance(clip, str):
-                        chunks.append(clip.strip())
-                    text = "\n\n".join([c for c in chunks if c])
 
-                    if text and len(text) >= h.cfg.embed_min_chars:
-                        now_t = time.monotonic()
-                        if (now_t - last_embed_ts) >= h.cfg.embed_min_interval_s:
-                            embed_evt, text_hash = build_embed_event(
-                                text=text,
+                    trigger_embed = False
+                    if window and window != last_window:
+                        trigger_embed = True
+                        last_window = window
+
+                    clip_fp = None
+                    if isinstance(clip, str) and clip.strip():
+                        clip_fp = _text_fingerprint(clip)
+                        if clip_fp != last_clip_fp:
+                            trigger_embed = True
+                            last_clip_fp = clip_fp
+
+                    if trigger_embed:
+                        text_material = " ".join(t for t in (window, clip or "") if t).strip()
+                        if text_material:
+                            embed_evt = build_embed_record(
+                                ts_iso=event["ts"],
                                 session=h.id,
                                 app=app,
                                 window=window,
+                                text=text_material,
+                                dim=32,  # keep >= schema min
                             )
-                            if text_hash != last_embed_hash:
-                                append_jsonl(h.wal_path, embed_evt)
-                                last_embed_hash = text_hash
-                                last_embed_ts = now_t
+                            append_jsonl(h.wal_path, embed_evt)
 
             time.sleep(poll_sleep)
     finally:
@@ -159,33 +183,25 @@ def run_loop(h: SessionHandle) -> None:
 
 
 def _write_audit_and_active(h: SessionHandle) -> None:
-    sess_dir = SESS_DIR / h.id
+    sess_dir = SESSIONS / h.id
     sess_dir.mkdir(parents=True, exist_ok=True)
-    (sess_dir / "audit.json").write_text(
-        json.dumps(
-            {
-                "session": h.id,
-                "ts_started": h.started_ts,
-                "pid": h.pid,
-                "wal_path": str(h.wal_path),
-                "config": asdict(h.cfg),
-                "sampler": "rust",
-            },
-            ensure_ascii=False,
-            indent=2,
-        ),
-        encoding="utf-8",
-    )
-
-    active = {
+    audit_file = sess_dir / "audit.json"
+    started_at = now_iso()
+    pid = os.getpid()
+    audit = {
         "session": h.id,
-        "pid": h.pid,
+        "started_at": started_at,
+        "pid": pid,
+        "flags": {
+            "clipboard": h.cfg.clipboard_allowed,
+            "screenshots": h.cfg.screenshots_allowed,
+            "embed": h.cfg.embeddings_enabled,
+            "poll_ms": h.cfg.poll_interval_ms,
+        },
         "wal_path": str(h.wal_path),
-        "config": asdict(h.cfg),
     }
-    tmp = (SESS_DIR / "active.json").with_suffix(".tmp")
-    tmp.write_text(json.dumps(active, ensure_ascii=False, indent=2), encoding="utf-8")
-    tmp.replace(SESS_DIR / "active.json")
+    _write_json(audit_file, audit)
+    _write_json(ACTIVE_FILE, {**audit, "active": True})
 
 
 def start_interactive_session(cfg: SessionConfig) -> None:
@@ -203,19 +219,24 @@ def start_interactive_session(cfg: SessionConfig) -> None:
 
     h = start(cfg)
     _write_audit_and_active(h)
-    print(
-        f"session {h.id} active  "
-        f"(clipboard={cfg.clipboard_allowed}, "
-        f"screenshots={cfg.screenshots_allowed}, "
-        f"embed={cfg.embeddings_enabled})"
-    )
-    print(f"wal: {h.wal_path}")
+
+    clip_status = "on" if h.cfg.clipboard_allowed else "off"
+    embed_status = "on" if h.cfg.embeddings_enabled else "off"
+    screenshots_status = "on" if h.cfg.screenshots_allowed else "off"
+
+    print(f"Session {h.id} active "
+          f"(clipboard={clip_status}, screenshots={screenshots_status}, embed={embed_status})")
+    print(f"WAL → {h.wal_path}")
+
     try:
         run_loop(h)
     finally:
         # best-effort cleanup
         try:
-            (SESS_DIR / "active.json").unlink(missing_ok=True)
+            (SESSIONS / h.id / "audit.json").rename(SESSIONS / h.id / "audit.finished.json")
+            active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
+            if active.get("pid") == h.pid:
+                _remove_silent(ACTIVE_FILE)
         except Exception:
             # Ignore errors during cleanup; file may not exist or be locked
             pass

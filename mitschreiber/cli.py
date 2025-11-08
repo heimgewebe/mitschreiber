@@ -7,9 +7,7 @@ import time
 from typing import Optional
 
 from .paths import WAL_DIR, SESS_DIR
-from .session import SessionConfig, start_interactive_session
-
-ACTIVE_FILE = SESS_DIR / "active.json"
+from .session import SessionConfig, start_interactive_session, ACTIVE_FILE, STATE_ROOT
 
 def _pid_alive(pid: int) -> bool:
     try:
@@ -51,86 +49,57 @@ def cmd_start(args: argparse.Namespace) -> int:
     )
 
     print("mitschreiber: starting session …")
-    print(f"  flags: clipboard={cfg.clipboard_allowed} screenshots={cfg.screenshots_allowed} embed={cfg.embeddings_enabled}")
-    print(f"  poll interval: {cfg.poll_interval_ms} ms")
-    print(f"  wal dir: {WAL_DIR}")
-
     # Start interactive (blocking) loop; this function schreibt audit + active.json
     start_interactive_session(cfg)
     return 0
 
 def cmd_stop(_args: argparse.Namespace) -> int:
-    if not ACTIVE_FILE.exists():
-        print("mitschreiber: no active session")
-        return 0
     try:
-        data = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        print("mitschreiber: active state unreadable – remove file and stop manually if needed:", ACTIVE_FILE)
-        return 2
-
-    pid = int(data.get("pid", 0))
-    sid = data.get("session")
-    if pid <= 0:
-        print("mitschreiber: invalid pid in active.json")
-        return 2
-
-    if not _pid_alive(pid):
-        print(f"mitschreiber: session {sid} is not running (stale active.json) – cleaning up")
-        try:
-            ACTIVE_FILE.unlink(missing_ok=True)  # py>=3.8
-        except Exception:
-            pass
-        return 0
-
-    if not _is_mitschreiber_proc(pid):
-        print(f"mitschreiber: process with pid {pid} is not a mitschreiber instance – not stopping")
-        return 1
-
-    print(f"mitschreiber: stopping session {sid} (pid={pid}) …")
+        active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
+    except FileNotFoundError:
+        print("No active session.")
+        return
+    pid = active.get("pid")
+    if not isinstance(pid, int):
+        print("Active session file is corrupt (missing pid).")
+        return
     try:
-        os.kill(pid, signal.SIGTERM)
+        os.kill(pid, 0)  # probe
     except ProcessLookupError:
-        # Process already exited
-        pass
-    # wait a bit
-    for _ in range(20):
-        if not _pid_alive(pid):
-            break
-        time.sleep(0.1)
-    if _pid_alive(pid):
-        print("  process did not exit in time, sending SIGKILL")
+        print("No running process for recorded session; clearing active status.")
         try:
-            os.kill(pid, signal.SIGKILL)
-        except ProcessLookupError:
+            ACTIVE_FILE.unlink()
+        except FileNotFoundError:
             pass
-    try:
-        ACTIVE_FILE.unlink(missing_ok=True)
-    except Exception as e:
-        print(f"mitschreiber: warning – could not remove active file {ACTIVE_FILE}: {e!r}")
-    print("mitschreiber: stopped.")
+        return
+    os.kill(pid, signal.SIGTERM)
+    print(f"Sent SIGTERM to session pid={pid}.")
     return 0
 
 def cmd_status(_args: argparse.Namespace) -> int:
+    STATE_ROOT.mkdir(parents=True, exist_ok=True)
     if not ACTIVE_FILE.exists():
-        print("mitschreiber: no active session")
-        return 0
+        print("No active session.")
+        return
     try:
-        data = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
-    except Exception:
-        print("mitschreiber: active state unreadable:", ACTIVE_FILE)
-        return 2
-    pid = int(data.get("pid", 0))
-    sid = data.get("session")
-    wal = data.get("wal_path")
-    cfg = data.get("config", {})
-
-    alive = _pid_alive(pid)
-    print(f"Session: {sid}")
-    print(f"  pid: {pid}  alive={alive}")
-    print(f"  wal: {wal}")
-    print(f"  flags: clipboard={cfg.get('clipboard_allowed')} screenshots={cfg.get('screenshots_allowed')} embed={cfg.get('embeddings_enabled')}")
-    print(f"  poll_interval_ms: {cfg.get('poll_interval_ms')}")
+        active = json.loads(ACTIVE_FILE.read_text(encoding="utf-8"))
+    except Exception as e:
+        print(f"Failed to read active status: {e}")
+        return
+    pid = active.get("pid")
+    running = False
+    if isinstance(pid, int):
+        try:
+            os.kill(pid, 0)
+            running = True
+        except ProcessLookupError:
+            running = False
+    flags = active.get("flags", {})
+    print(f"Session: {active.get('session')}")
+    print(f"PID: {pid}  running={running}")
+    print(f"Started: {active.get('started_at')}")
+    print(f"Embed: {flags.get('embed')}  Clipboard: {flags.get('clipboard')}  Screenshots: {flags.get('screenshots')}")
+    print(f"WAL: {active.get('wal_path')}")
     return 0
 
 def build_parser() -> argparse.ArgumentParser:
