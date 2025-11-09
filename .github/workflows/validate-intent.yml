@@ -1,0 +1,15 @@
+name: validate-intent
+on:
+  push:
+    paths: ["export/**", ".github/workflows/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  ajv:
+    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@contracts-v1
+    with:
+      jsonl_path: export/os.intent.jsonl
+      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/contracts-v1/contracts/os.context.intent.schema.json
+      strict: false
+      validate_formats: true
