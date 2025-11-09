@@ -1,0 +1,2 @@
+{"ts":"2025-11-08T20:15:00Z","actor":"user:alex","goal":"build docs","scope":{"repo":"~/code/heimgewebe/metarepo"},"context":{"app":{"name":"obsidian"}}, "tags":["docs"]}
+{"ts":"2025-11-08T20:20:00Z","actor":"sys:mitschreiber","goal":"analyze repo","scope":{"repo":"https://github.com/heimgewebe/hausKI","branch":"main"}}
