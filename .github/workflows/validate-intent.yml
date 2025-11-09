@@ -3,7 +3,8 @@ on:
   push:
     paths: ["export/**", ".github/workflows/**"]
   pull_request:
-
+permissions:
+  contents: read
 jobs:
   ajv:
     uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@contracts-v1
