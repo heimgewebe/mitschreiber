@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "On-device context sampler & embedder"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = ["psutil"]
 
 [project.optional-dependencies]
 embed = ["sentence-transformers>=2.6.1"]

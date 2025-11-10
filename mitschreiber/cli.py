@@ -1,6 +1,7 @@
 # mitschreiber/cli.py
 from __future__ import annotations
 import argparse, json, os, signal, sys, uuid
+import psutil
 from pathlib import Path
 from .session import run_session, SESSIONS_DIR
 
@@ -47,16 +48,15 @@ def cmd_stop(_):
     try:
         if not pid:
             return
-
-        cmdline_path = Path(f"/proc/{pid}/cmdline")
-        if not cmdline_path.is_file():
+        try:
+            p = psutil.Process(pid)
+            # Check if the process name or command line contains "mitschreiber"
+            cmdline = " ".join(p.cmdline())
+            if "mitschreiber" not in cmdline:
+                print(f"PID {pid} is not a mitschreiber process. Stale session file.")
+                return
+        except psutil.NoSuchProcess:
             print(f"Process {pid} not found. Stale session file.")
-            return
-
-        # The command line arguments are null-separated.
-        cmdline = cmdline_path.read_text(encoding="utf-8").split('\x00')
-        if not any("mitschreiber" in arg for arg in cmdline):
-            print(f"PID {pid} is not a mitschreiber process. Stale session file.")
             return
 
         os.kill(pid, signal.SIGINT)
