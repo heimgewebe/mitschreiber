@@ -1,4 +1,4 @@
-name: Validate JSONL
+name: Validate JSONL (embed)
 on:
   push:
     branches: [ main ]
@@ -55,10 +55,4 @@ jobs:
         fixtures/mitschreiber/embed*.jsonl
       schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.text.embed.schema.json
 
-  # Beispiel für weitere Streams (später aktivieren):
-  # validate-embed:
-  #   # Keep the pinned SHA in sync with CONTRACTS_REF above.
-  #   uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
-  #   with:
-  #     jsonl_paths_list: fixtures/mitschreiber/embed*.jsonl
-  #     schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.text.embed.schema.json
+  # (Weitere Streams können bei Bedarf in separaten Jobs ergänzt werden.)
