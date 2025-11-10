@@ -14,3 +14,7 @@ validate:fixtures:
     @echo "→ Prüfe fixtures via reusable-validate-jsonl (GitHub CI). Lokal (ohne vendorte Schemas):"
     @echo "  ajv validate --spec=draft2020 -s contracts/os.context.text.embed.schema.json -d fixtures/mitschreiber/embed*.jsonl || true"
     @echo "  # Offline? Schema vendoren und Pfad im Befehl anpassen."
+default: lint
+lint:
+    bash -n $(git ls-files *.sh *.bash)
+    echo "lint ok"
