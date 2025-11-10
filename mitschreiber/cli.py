@@ -21,11 +21,16 @@ def cmd_start(args):
     SESSIONS_DIR.mkdir(parents=True, exist_ok=True)
     _active_path().write_text(json.dumps(active, indent=2), encoding="utf-8")
     print(f"Session {sid} active (embed={args.embed}, clipboard={args.clipboard}, poll={args.poll_interval}ms)")
-    # Übergibt in den Event-Loop (blockiert bis Ctrl+C)
-    run_session(session_id=sid,
-                embed=args.embed,
-                clipboard=args.clipboard,
-                poll_ms=int(args.poll_interval))
+    try:
+        # Übergibt in den Event-Loop (blockiert bis Ctrl+C)
+        run_session(session_id=sid,
+                    embed=args.embed,
+                    clipboard=args.clipboard,
+                    poll_ms=int(args.poll_interval))
+    finally:
+        # Nach Beendigung (sauber oder via Crash)
+        _active_path().unlink(missing_ok=True)
+        print("Session stopped.")
 
 def cmd_status(_):
     if not _active_path().exists():
@@ -40,13 +45,26 @@ def cmd_stop(_):
     meta = json.loads(_active_path().read_text(encoding="utf-8"))
     pid = meta.get("pid")
     try:
+        if not pid:
+            return
+
+        cmdline_path = Path(f"/proc/{pid}/cmdline")
+        if not cmdline_path.is_file():
+            print(f"Process {pid} not found. Stale session file.")
+            return
+
+        # The command line arguments are null-separated.
+        cmdline = cmdline_path.read_text(encoding="utf-8").split('\x00')
+        if not any("mitschreiber" in arg for arg in cmdline):
+            print(f"PID {pid} is not a mitschreiber process. Stale session file.")
+            return
+
         os.kill(pid, signal.SIGINT)
         print(f"Sent SIGINT to PID {pid}")
     except Exception as e:
-        print(f"Stop hint: {e}. Removing active.json.")
-    try:
-        _active_path().unlink(missing_ok=True)
+        print(f"Stop hint: {e}")
     finally:
+        _active_path().unlink(missing_ok=True)
         print("Session stopped.")
 
 def main(argv=None):
