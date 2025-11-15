@@ -2,6 +2,9 @@ name: Reusable WGX
 on:
   workflow_call:
 
+permissions:
+  contents: read
+
 jobs:
   wgx:
     runs-on: ubuntu-latest
