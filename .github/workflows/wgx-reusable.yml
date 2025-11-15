@@ -1,0 +1,16 @@
+name: Reusable WGX
+on:
+  workflow_call:
+
+jobs:
+  wgx:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run smoke task
+        run: ./wgx/wgx smoke
+
+      - name: Run guard task
+        run: ./wgx/wgx guard

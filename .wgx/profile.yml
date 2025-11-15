@@ -1,0 +1,36 @@
+class: rust-python-hybrid
+
+tasks:
+  smoke: |
+    echo "[mitschreiber] running smoke…"
+    cargo build --workspace
+    python3 - <<'EOF'
+import importlib
+try:
+    import mitschreiber
+    print("mitschreiber import OK")
+except Exception as e:
+    print("IMPORT FAIL:", e)
+    raise SystemExit(1)
+EOF
+
+  guard: |
+    echo "[mitschreiber] running guard…"
+    cargo fmt --all --check
+    cargo clippy --all-targets --all-features -- -D warnings
+    if command -v ruff >/dev/null; then
+      ruff check .
+    else
+      echo "ruff not installed; skipping Py lint"
+    fi
+    cargo test --workspace
+    python3 -m pytest || true
+
+  metrics: |
+    if [ -x scripts/wgx-metrics-snapshot.sh ]; then
+      scripts/wgx-metrics-snapshot.sh --json
+    else
+      echo "No metrics script for mitschreiber, skipping."
+    fi
+
+  snapshot: ""
