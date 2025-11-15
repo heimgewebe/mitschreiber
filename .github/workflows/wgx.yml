@@ -1,0 +1,10 @@
+name: WGX
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  wgx:
+    uses: ./.github/workflows/wgx-reusable.yml

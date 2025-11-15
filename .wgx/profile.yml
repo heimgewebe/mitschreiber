@@ -1,0 +1,6 @@
+class: rust-service
+tasks:
+  smoke: "echo smoke"
+  guard: "echo guard"
+  metrics: "scripts/wgx-metrics-snapshot.sh --output metrics.json"
+  snapshot: "echo snapshot"
