@@ -1,0 +1,16 @@
+name: WGX Guard
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Run guard task
+        run: ./wgx/wgx guard
