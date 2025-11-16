@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# wgx – profilgetriebener Task-Runner für dieses Repo.
+# Liest .wgx/profile.yml, extrahiert tasks.<name> und führt
+# das hinterlegte Shell-Snippet aus.
+
+WGX_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+PROFILE="${WGX_ROOT}/.wgx/profile.yml"
+
+if [[ ! -f "${PROFILE}" ]]; then
+  echo "[wgx] ::error::.wgx/profile.yml fehlt (erwartet unter ${PROFILE})" >&2
+  exit 1
+fi
+
+# YAML-Parser laden
+if [[ ! -f "${WGX_ROOT}/wgx/lib/parse_yaml.sh" ]]; then
+  echo "[wgx] ::error::wgx/lib/parse_yaml.sh fehlt" >&2
+  exit 1
+fi
+source "${WGX_ROOT}/wgx/lib/parse_yaml.sh"
+
+SUBCOMMAND="${1:-}"
+
+if [[ -z "${SUBCOMMAND}" ]]; then
+  cat >&2 <<EOF
+Usage: wgx <task>
+
+Bekannte Tasks werden aus .wgx/profile.yml (tasks.<name>) gelesen,
+zum Beispiel:
+
+  wgx smoke
+  wgx guard
+  wgx metrics
+  wgx snapshot
+
+EOF
+  exit 1
+fi
+
+# Profil in Umgebungsvariablen expandieren
+eval "$(parse_yaml "${PROFILE}" "wgx_")"
+
+TASK_VAR="wgx_tasks_${SUBCOMMAND}"
+TASK_COMMAND="${!TASK_VAR:-}"
+
+if [[ -z "${TASK_COMMAND}" ]]; then
+  echo "[wgx] Hinweis: kein Task '${SUBCOMMAND}' im Profil definiert" >&2
+  echo "[wgx] Bekannte Tasks (Auszug):" >&2
+  env | grep '^wgx_tasks_' || true
+  exit 1
+fi
+
+echo "[wgx] running task '${SUBCOMMAND}'..."
+
+# Zur Sicherheit in Repo-Root wechseln
+cd "${WGX_ROOT}"
+
+# Befehl in einer neuen Shell ausführen, damit lokale set-Optionen etc.
+# im Profil-Kommando keinen Einfluss auf diesen Wrapper haben.
+bash -lc "${TASK_COMMAND}"
+
+status=$?
+if [[ $status -ne 0 ]]; then
+  echo "[wgx] task '${SUBCOMMAND}' failed with status ${status}" >&2
+  exit "$status"
+fi
+
+echo "[wgx] task '${SUBCOMMAND}' finished successfully."

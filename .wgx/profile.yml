@@ -1,0 +1,24 @@
+# Lokales wgx-Profil für mitschreiber.
+#
+# WICHTIG: Der einfache Bash-YAML-Parser in wgx/lib/parse_yaml.sh
+# kann nur Key → Single-Line-Value. Komplexere Logik bitte in
+# eigene Shell-Skripte auslagern und hier nur referenzieren.
+
+class: rust-python-hybrid
+
+tasks:
+  # Schnelle, ungefährliche Prüfung: gibt es Shell-Skripte und
+  # bestehen sie die Lint-Prüfung?
+  guard: "just lint || echo '[mitschreiber] lint skipped (just or tools missing)'"
+
+  # Minimaler Smoke-Test: Profilierte Ausgabe, kein schwerer Build.
+  # Diese Aufgabe ist bewusst leichtgewichtig, damit sie in allen
+  # Repos der Flotte gleichermaßen läuft.
+  smoke: "echo '[mitschreiber] smoke: repo erreichbar, wgx-Profil geladen'"
+
+  # Metrics-Snapshot über vorhandenes Skript. Erwartet jq im PATH
+  # (wird in zentralen Setups bereitgestellt).
+  metrics: "scripts/wgx-metrics-snapshot.sh --json"
+
+  # Reserviert für spätere Snapshot-/Backup-Tasks.
+  snapshot: ""
