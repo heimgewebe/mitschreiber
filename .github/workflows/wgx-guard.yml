@@ -1,0 +1,32 @@
+# Lokaler wgx-v1-Runner für mitschreiber; CI-Hauptworkflow bleibt metarepo-gestützt.
+name: wgx-guard
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Bash is executable
+        run: chmod +x wgx/wgx
+
+      - name: Run wgx guard task
+        run: |
+          ./wgx/wgx guard
+
+      # Optional Artefakt-Sammlung/Logs später hier ergänzen:
+      # - name: Upload guard artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: wgx-guard-logs
+      #     path: .runtime/logs
