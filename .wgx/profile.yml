@@ -18,7 +18,7 @@ tasks:
 
   # Metrics-Snapshot über vorhandenes Skript. Erwartet jq im PATH
   # (wird in zentralen Setups bereitgestellt).
-  metrics: "scripts/wgx-metrics-snapshot.sh --json"
+  metrics: "scripts/wgx-metrics-snapshot.sh --json || echo '[mitschreiber] metrics skipped (script missing or failed)'"
 
   # Reserviert für spätere Snapshot-/Backup-Tasks.
   snapshot: ""
