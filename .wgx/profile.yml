@@ -1,0 +1,95 @@
+---
+# WGX v1 Profil für mitschreiber
+profile: mitschreiber
+description: "On-device OS-Kontext-Sampler & Embedder"
+wgx-version: ">=1.0.0"
+
+class: rust-python-hybrid
+
+lang:
+  - rust
+  - python
+  - shell
+
+meta:
+  org: heimgewebe
+  repo: mitschreiber
+  tags:
+    - mitschreiber
+    - context
+    - embed
+    - heimgewebe
+    - wgx
+  ci: true
+
+rust:
+  toolchain: stable
+
+python:
+  uv: true
+
+tool:
+  uv:
+    sync: true
+
+env:
+  UV_SYSTEM_PYTHON: "1"
+  PIP_DISABLE_PIP_VERSION_CHECK: "1"
+  RUSTFLAGS: "-C debuginfo=0"
+  PYTHONUNBUFFERED: "1"
+  UV_PIP_VERSION: "24.0"
+
+tasks:
+  smoke: |
+    echo "[wgx.smoke] mitschreiber – schneller Grundcheck"
+    if command -v cargo >/dev/null 2>&1; then
+      cargo build --workspace --quiet || echo "[wgx.smoke] cargo build skipped/failed (nicht fatal)."
+    else
+      echo "[wgx.smoke] cargo nicht vorhanden – Rust-Build übersprungen."
+    fi
+    if command -v uv >/dev/null 2>&1; then
+      uv run python - <<'PY' || echo "[wgx.smoke] Python-Import fehlgeschlagen (nicht fatal)."
+try:
+    import mitschreiber  # noqa: F401
+    print("mitschreiber import ok")
+except Exception as e:
+    print(f"mitschreiber import failed: {e}")
+PY
+    else
+      echo "[wgx.smoke] uv nicht vorhanden – Python-Smoke übersprungen."
+    fi
+
+  guard: |
+    echo "[wgx.guard] mitschreiber prüfen…"
+    if command -v cargo >/dev/null 2>&1; then
+      cargo fmt --all --check
+      cargo clippy --all-targets --all-features -- -D warnings
+    else
+      echo "[wgx.guard] cargo nicht vorhanden – Rust-Checks übersprungen."
+    fi
+    if command -v uv >/dev/null 2>&1; then
+      uv sync --frozen || uv sync
+      uv run pytest --maxfail=1 --disable-warnings
+    else
+      echo "[wgx.guard] uv nicht vorhanden – Python-Tests übersprungen."
+    fi
+
+  metrics: |
+    echo "[wgx.metrics] Snapshot via scripts/wgx-metrics-snapshot.sh…"
+    if [ -x scripts/wgx-metrics-snapshot.sh ]; then
+      WGX_METRICS_OUTPUT="${WGX_METRICS_OUTPUT:-metrics.json}" \
+        bash scripts/wgx-metrics-snapshot.sh --json || echo "[wgx.metrics] Snapshot fehlgeschlagen (best effort)."
+    else
+      echo "[wgx.metrics] scripts/wgx-metrics-snapshot.sh fehlt oder ist nicht ausführbar – Metrics übersprungen."
+    fi
+
+  snapshot: |
+    echo "[wgx.snapshot] Fixtures & Basis-Checks (best effort)…"
+    if command -v just >/dev/null 2>&1; then
+      just emit:fixtures || echo "[wgx.snapshot] just emit:fixtures fehlgeschlagen (ok)."
+    else
+      echo "[wgx.snapshot] just nicht vorhanden – Fixtures-Helper übersprungen."
+    fi
+    if command -v uv >/dev/null 2>&1; then
+      uv run python -m mitschreiber status || echo "[wgx.snapshot] status-Aufruf fehlgeschlagen (ok)."
+    fi

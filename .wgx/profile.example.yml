@@ -1,16 +1,18 @@
-wgx:
-  apiVersion: v1
-  requiredWgx: "^2.0.0"
-  repoKind: generic
+---
+# Beispielprofil für mitschreiber – minimal, CI-sicher.
+# Das produktive Profil liegt in `.wgx/profile.yml`.
 
-  tooling:
-    shell:
-      default: bash
+profile: mitschreiber-example
+description: "Minimal example WGX profile for mitschreiber"
+wgx-version: ">=1.0.0"
 
-  tasks:
-    up: "echo bootstrap"
-    lint: "bash -n $(git ls-files '*.sh' '*.bash') && echo lint ok"
-    test: "echo test"
-    build: "echo build"
-    smoke: "echo smoke"
-    metrics: "scripts/wgx-metrics-snapshot.sh --output metrics.json"
+class: rust-python-hybrid
+
+tasks:
+  # Sehr leichter Smoke-Test, der auch auf nackten Clones nicht scheitert.
+  smoke: "echo '[wgx.smoke] mitschreiber example profile – repo erreichbar'"
+
+  # Platzhalter, damit Guard-Checks ein definiertes Feld vorfinden.
+  guard: "echo '[wgx.guard] example profile – bitte .wgx/profile.yml pflegen'"
+
+  metrics: "echo '[wgx.metrics] example profile – verwendet scripts/wgx-metrics-snapshot.sh im echten Profil'"
