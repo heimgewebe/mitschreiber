@@ -1,0 +1,31 @@
+# Lokaler wgx-v1-Runner für mitschreiber; CI-Hauptworkflow bleibt metarepo-gestützt.
+name: wgx-smoke
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Ensure Bash is executable
+        run: chmod +x wgx/wgx
+
+      - name: Run wgx smoke task
+        run: |
+          ./wgx/wgx smoke
+
+      # Platzhalter für spätere Erweiterungen (z. B. Embedding-Smoke, WAL-Check):
+      # - name: Upload smoke artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: wgx-smoke-logs
+      #     path: .runtime/logs
