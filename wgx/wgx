@@ -57,9 +57,34 @@ echo "[wgx] running task '${SUBCOMMAND}'..."
 # Zur Sicherheit in Repo-Root wechseln
 cd "${WGX_ROOT}"
 
+# Sanitize TASK_COMMAND:
+# 1. Strip leading YAML block marker line (a line that is only '|' possibly surrounded by whitespace)
+# 2. Remove leading blank lines
+# 3. Validate that command is non-empty after sanitization
+# 4. Guard against commands that still begin with '|'
+
+# Strip a leading line that is only '|' (with optional surrounding whitespace)
+TASK_COMMAND="$(printf '%s' "${TASK_COMMAND}" | sed '1{/^[[:space:]]*|[[:space:]]*$/d}')"
+
+# Remove leading blank lines
+TASK_COMMAND="$(printf '%s' "${TASK_COMMAND}" | sed '/./,$!d')"
+
+# Validate that the command is non-empty after sanitization
+if [[ -z "${TASK_COMMAND}" ]] || [[ "${TASK_COMMAND}" =~ ^[[:space:]]*$ ]]; then
+  echo "[wgx] ::error::task '${SUBCOMMAND}' has empty command after sanitization" >&2
+  exit 1
+fi
+
+# Guard against commands that still begin with '|' (which would cause bash syntax error)
+if [[ "${TASK_COMMAND}" =~ ^[[:space:]]*\| ]]; then
+  echo "[wgx] ::error::task '${SUBCOMMAND}' command starts with '|' which is invalid for bash" >&2
+  exit 1
+fi
+
 # Befehl in einer neuen Shell ausführen, damit lokale set-Optionen etc.
 # im Profil-Kommando keinen Einfluss auf diesen Wrapper haben.
-bash -lc "${TASK_COMMAND}"
+# Use "--" separator to avoid accidental interpretation of command strings as options.
+bash -lc -- "${TASK_COMMAND}"
 
 status=$?
 if [[ $status -ne 0 ]]; then
