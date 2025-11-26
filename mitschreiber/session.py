@@ -2,7 +2,7 @@
 from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
-import json, fcntl, time, os
+import json, fcntl, time
 from typing import Dict, Any, Optional
 
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state

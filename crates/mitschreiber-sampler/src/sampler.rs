@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
-use crossbeam_channel::{unbounded, Sender, Receiver, TryRecvError};
+use crossbeam_channel::{unbounded, Sender, Receiver};
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OsContextState {
