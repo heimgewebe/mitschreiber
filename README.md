@@ -30,7 +30,7 @@ Keine Cloud, kein Rohtext, kein Tracking.
 - **Redigierte Text-Snippets (Opt-in):** flüchtig im RAM/WAL
 - **Embeddings + Keyphrases:** persistierbar, ohne Rohtext
 - **PII-/Secret-Gate:** erkennt und maskiert sensible Daten
-- **Leitstand-Anbindung:** JSONL-Event-Streams (`feed.jsonl`-kompatibel)
+- **Chronik-Anbindung:** JSONL-Event-Streams (`feed.jsonl`-kompatibel)
 
 ---
 
