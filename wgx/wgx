@@ -64,9 +64,17 @@ cd "${WGX_ROOT}"
 # 4. Guard against commands that still begin with '|'
 
 # Strip a leading line that is only '|' (with optional surrounding whitespace)
+# The sed pattern '1{/^[[:space:]]*|[[:space:]]*$/d}' means:
+#   1{...} = apply only to line 1
+#   /^[[:space:]]*|[[:space:]]*$/ = match line containing only '|' with optional whitespace
+#   d = delete the line if it matches
 TASK_COMMAND="$(printf '%s' "${TASK_COMMAND}" | sed '1{/^[[:space:]]*|[[:space:]]*$/d}')"
 
 # Remove leading blank lines
+# The sed pattern '/./,$!d' means: delete all lines before the first non-empty line
+# /./,$ = from first line containing any character to end of file
+# ! = invert (select lines NOT in this range, i.e., leading empty lines)
+# d = delete those lines
 TASK_COMMAND="$(printf '%s' "${TASK_COMMAND}" | sed '/./,$!d')"
 
 # Validate that the command is non-empty after sanitization
@@ -76,6 +84,8 @@ if [[ -z "${TASK_COMMAND}" ]] || [[ "${TASK_COMMAND}" =~ ^[[:space:]]*$ ]]; then
 fi
 
 # Guard against commands that still begin with '|' (which would cause bash syntax error)
+# The regex ^[[:space:]]*\| checks if the command starts with optional whitespace followed
+# by a pipe character. In bash regex, the pipe needs to be escaped with backslash.
 if [[ "${TASK_COMMAND}" =~ ^[[:space:]]*\| ]]; then
   echo "[wgx] ::error::task '${SUBCOMMAND}' command starts with '|' which is invalid for bash" >&2
   exit 1
