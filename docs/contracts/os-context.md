@@ -1,4 +1,4 @@
-# Contracts: OS Context (mitschreiber → leitstand/semantAH)
+# Contracts: OS Context (mitschreiber → chronik/semantAH)
 
 Dieses Dokument beschreibt die auf Datenschutz ausgelegten Contracts für kontextbezogene OS-Signale des mitschreiber-Dienstes.
 
