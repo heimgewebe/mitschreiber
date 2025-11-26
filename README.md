@@ -18,7 +18,7 @@ Keine Cloud, kein Rohtext, kein Tracking.
 | Rolle | Beschreibung |
 |-------|---------------|
 | **Producer** | mitschreiber (Erfassung, Redaction, Embedding) |
-| **Consumer** | leitstand (Ingest), semantAH (Suche/Graph), heimlern (Policy-Feedback) |
+| **Consumer** | chronik (Ingest), semantAH (Suche/Graph), heimlern (Policy-Feedback) |
 | **Contracts** | aus metarepo (gepinnt auf `78674c7159fb4c623cf3d65e978e4e5d6ca699bb`) – `os.context.*` |
 
 ---
@@ -38,9 +38,9 @@ Keine Cloud, kein Rohtext, kein Tracking.
 
 ```text
 mitschreiber
-├─ emits os.context.state          → leitstand ingest
+├─ emits os.context.state          → chronik ingest
 ├─ emits os.context.text.redacted  → RAM/WAL (flüchtig)
-└─ emits os.context.text.embed     → leitstand ingest → semantAH
+└─ emits os.context.text.embed     → chronik ingest → semantAH
 ```
 
 ---
