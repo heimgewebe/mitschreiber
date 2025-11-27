@@ -43,8 +43,7 @@ jobs:
     steps:
       - name: Check schema availability (${{ matrix.stream }})
         env:
-          # yamllint disable-line rule:line-length
-          SCHEMA_URL: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/${{ matrix.schema_file }}
+          SCHEMA_URL: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/${{ matrix.schema_file }}  # yamllint disable-line rule:line-length
         run: curl -fsSL --retry 3 --retry-delay 2 --max-time 10 "$SCHEMA_URL" >/dev/null
 
   validate-embed:
