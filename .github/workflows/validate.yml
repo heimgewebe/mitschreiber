@@ -40,6 +40,9 @@ jobs:
           - stream: redacted
             schema_file: os.context.text.redacted.schema.json
     steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
       - name: Check schema availability (${{ matrix.stream }})
         env:
           SCHEMA_URL: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/${{ matrix.schema_file }}
