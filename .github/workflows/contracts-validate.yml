@@ -61,7 +61,7 @@ jobs:
             line="${line%%#*}"
             line="${line##+([[:space:]])}"
             line="${line%%+([[:space:]])}"
-            if [[ "$line" =~ ^(-[[:space:]]*)?uses:[[:space:]]*\'([^\']+)\' ]]; then
+            if [[ "$line" =~ ^(-[[:space:]]*)?uses:[[:space:]]*\'([^']+)\' ]]; then
               echo "${BASH_REMATCH[2]}"; return 0
             fi
             if [[ "$line" =~ ^(-[[:space:]]*)?uses:[[:space:]]*\"([^\"]+)\" ]]; then
