@@ -1,7 +1,7 @@
 name: Validate JSONL
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - '.github/workflows/validate.yml'
       - 'fixtures/**'
@@ -47,18 +47,17 @@ jobs:
 
   validate-embed:
     needs: contract-sanity
-    timeout-minutes: 10
     # Keep the pinned SHA in sync with CONTRACTS_REF above.
     uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
     with:
       jsonl_paths_list: |
         fixtures/mitschreiber/embed*.jsonl
-      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.text.embed.schema.json
+      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json
 
   # Beispiel für weitere Streams (später aktivieren):
   # validate-embed:
-  #   # Keep the pinned SHA in sync with CONTRACTS_REF above.
+  #   # Keep the pinned SHA in sync with CONTRACTS_REF above and hardcode in schema_url.
   #   uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
   #   with:
   #     jsonl_paths_list: fixtures/mitschreiber/embed*.jsonl
-  #     schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.text.embed.schema.json
+  #     schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json
