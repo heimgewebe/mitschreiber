@@ -1,3 +1,4 @@
+---
 name: Validate JSONL
 on:
   push:
@@ -42,6 +43,7 @@ jobs:
     steps:
       - name: Check schema availability (${{ matrix.stream }})
         env:
+          # yamllint disable-line rule:line-length
           SCHEMA_URL: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/${{ matrix.schema_file }}
         run: curl -fsSL --retry 3 --retry-delay 2 --max-time 10 "$SCHEMA_URL" >/dev/null
 
@@ -52,12 +54,13 @@ jobs:
     with:
       jsonl_paths_list: |
         fixtures/mitschreiber/embed*.jsonl
+      # yamllint disable-line rule:line-length
       schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json
 
-  # Beispiel für weitere Streams (später aktivieren):
-  # validate-embed:
-  #   # Keep the pinned SHA in sync with CONTRACTS_REF above and hardcode in schema_url.
-  #   uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
-  #   with:
-  #     jsonl_paths_list: fixtures/mitschreiber/embed*.jsonl
-  #     schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json
+# Beispiel für weitere Streams (später aktivieren):
+# validate-embed:
+#   # Keep the pinned SHA in sync with CONTRACTS_REF above and hardcode in schema_url.
+#   uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@<SHA>
+#   with:
+#     jsonl_paths_list: fixtures/mitschreiber/embed*.jsonl
+#     schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/<SHA>/...schema.json
