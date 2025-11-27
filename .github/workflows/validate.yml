@@ -53,8 +53,8 @@ jobs:
     with:
       jsonl_paths_list: |
         fixtures/mitschreiber/embed*.jsonl
-      # yamllint disable-line rule:line-length
-      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json
+      
+      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json  # yamllint disable-line rule:line-length
 
 # Beispiel für weitere Streams (später aktivieren):
 # validate-embed:
