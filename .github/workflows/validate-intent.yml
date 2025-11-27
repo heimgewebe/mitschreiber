@@ -1,3 +1,4 @@
+---
 name: validate-intent
 on:
   push:
@@ -10,6 +11,7 @@ jobs:
     uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@contracts-v1
     with:
       jsonl_path: export/os.intent.jsonl
-      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/contracts-v1/contracts/os.context.intent.schema.json
+      
+      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/contracts-v1/contracts/os.context.intent.schema.json  # yamllint disable-line rule:line-length
       strict: false
       validate_formats: true

@@ -1,3 +1,4 @@
+---
 # Lokaler wgx-v1-Runner für mitschreiber; CI-Hauptworkflow bleibt metarepo-gestützt.
 name: wgx-smoke
 

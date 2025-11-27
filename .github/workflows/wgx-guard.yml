@@ -1,3 +1,4 @@
+---
 name: wgx-guard
 
 permissions:
@@ -26,4 +27,5 @@ on:
 jobs:
   guard:
     name: "WGX guard (central)"
+    # NOTE: Using @main for latest updates; consider pinning to a SHA for stability
     uses: heimgewebe/wgx/.github/workflows/wgx-guard.yml@main

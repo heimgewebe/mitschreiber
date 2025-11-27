@@ -1,3 +1,4 @@
+---
 extends: default
 ignore: |
   .venv/
@@ -9,4 +10,5 @@ rules:
     max: 120
     level: warning
   truthy:
-    allowed-values: ['true', 'false']
+    # GitHub Actions uses 'on' as a keyword for triggers (not boolean)
+    allowed-values: ['true', 'false', 'on']
