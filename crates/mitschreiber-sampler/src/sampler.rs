@@ -117,8 +117,8 @@ pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Option<String>> {
 /// Simple probe to simulate changing state (replace with real X11/Wayland code)
 fn probe_once(counter: u64) -> OsContextState {
     let ts = chrono::Utc::now().to_rfc3339();
-    let app = if counter % 3 == 0 { "firefox" } else { "vscode" };
-    let window = if counter % 5 == 0 { "README.md" } else { "Editor" };
+    let app = if counter.is_multiple_of(3) { "firefox" } else { "vscode" };
+    let window = if counter.is_multiple_of(5) { "README.md" } else { "Editor" };
     OsContextState {
         ts,
         app: app.to_string(),
