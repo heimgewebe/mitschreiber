@@ -1,19 +1,16 @@
 # mitschreiber/session.py
 from __future__ import annotations
-from datetime import datetime, timezone
 from pathlib import Path
 import json, fcntl, time
 from typing import Dict, Any, Optional
 
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
+from .util import now_iso
 
 HOME = Path.home()
 DATA_DIR = HOME / ".local" / "share" / "mitschreiber"
 WAL_DIR = DATA_DIR / "wal"
 SESSIONS_DIR = DATA_DIR / "sessions"
-
-def _now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 def _append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -31,7 +28,7 @@ def _emit_embed(state_evt: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     # Achtung: Demo-Embedding mit 8 Werten
     vec = [((ord(c) % 17) - 8) / 100.0 for c in h[:8]]
     return {
-        "ts": _now_iso(),
+        "ts": now_iso(),
         "source": "os.context.text.embed",
         "session": state_evt["session"],
         "app": state_evt.get("app"),
@@ -58,7 +55,7 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
             if raw_evt:
                 evt = json.loads(raw_evt)
                 # Normalisieren & schreiben
-                evt["ts"] = _now_iso()
+                evt["ts"] = now_iso()
                 evt["source"] = "os.context.state"
                 evt["session"] = session_id
                 _append_jsonl(wal, evt)
