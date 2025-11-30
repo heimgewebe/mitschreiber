@@ -1,5 +1,6 @@
 # mitschreiber/session.py
 from __future__ import annotations
+from pathlib import Path
 import json, fcntl, time
 from typing import Dict, Any, Optional
 
