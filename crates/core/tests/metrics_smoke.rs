@@ -4,11 +4,11 @@
 //! nicht scheitern, wenn kein Server läuft. Er kann gezielt aktiviert werden:
 //!
 //! ```bash
-//! HAUSKI_TEST_BASE_URL="http://127.0.0.1:8080" \
-//!   cargo test -p hauski-core --test metrics_smoke -- --ignored --nocapture
+//! MITSCHREIBER_TEST_BASE_URL="http://127.0.0.1:8080" \
+//!   cargo test -p mitschreiber-core --test metrics_smoke -- --ignored --nocapture
 //! ```
 //!
-//! Erwartung: Ein laufender hausKI-Server (z. B. `hauski-cli serve`) exponiert
+//! Erwartung: Ein laufender mitschreiber-Server exponiert
 //! Prometheus-Metriken unter GET /metrics (Content-Type text/plain; version=0.0.4).
 
 use http::StatusCode;
@@ -16,7 +16,7 @@ use reqwest::header::{ACCEPT, CONTENT_TYPE};
 use std::time::Duration;
 
 fn base_url() -> String {
-    std::env::var("HAUSKI_TEST_BASE_URL")
+    std::env::var("MITSCHREIBER_TEST_BASE_URL")
         .ok()
         .unwrap_or_else(|| "http://127.0.0.1:8080".to_string())
 }

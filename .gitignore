@@ -23,9 +23,6 @@ fixtures/**/*.generated.*
 target/
 Cargo.lock
 
-# Rust
-/target
-
 # Node
 node_modules/
 metrics.json

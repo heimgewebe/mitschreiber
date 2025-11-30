@@ -1,3 +1,12 @@
+"""
+Demo/test embedding module using deterministic hash-based pseudo-embeddings.
+
+This module provides zero-dependency embeddings for testing and demo purposes.
+Uses BLAKE2b hashing to create deterministic pseudo-embeddings.
+
+For production ML-based embeddings, see embed.py instead.
+For the simple inline implementation, see session.py's _emit_embed().
+"""
 from __future__ import annotations
 import hashlib
 import re

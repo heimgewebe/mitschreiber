@@ -1,3 +1,12 @@
+"""
+Production embedding module using sentence-transformers for ML-based embeddings.
+
+This module provides real semantic embeddings using transformer models.
+Requires the 'embed' extra dependency: pip install mitschreiber[embed]
+
+For zero-dependency demo/testing, see embedding.py instead.
+For the simple inline implementation, see session.py's _emit_embed().
+"""
 from __future__ import annotations
 import hashlib
 import os

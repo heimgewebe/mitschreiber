@@ -6,11 +6,10 @@ from typing import Dict, Any, Optional
 
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
 from .util import now_iso
+from .paths import WAL_DIR, SESS_DIR
 
-HOME = Path.home()
-DATA_DIR = HOME / ".local" / "share" / "mitschreiber"
-WAL_DIR = DATA_DIR / "wal"
-SESSIONS_DIR = DATA_DIR / "sessions"
+# Use SESS_DIR for consistency with paths.py
+SESSIONS_DIR = SESS_DIR
 
 def _append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
