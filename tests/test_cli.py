@@ -66,3 +66,28 @@ def test_stop_sends_signal(mock_process_cls, mock_kill, mock_session_dir, capsys
     assert not active_file.exists()
     captured = capsys.readouterr()
     assert f"Sent SIGINT to PID {pid}" in captured.out
+
+
+def test_status_handles_disappearing_active_file(monkeypatch, capsys):
+    fake_path = MagicMock()
+    fake_path.exists.return_value = True
+    fake_path.read_text.side_effect = FileNotFoundError
+
+    monkeypatch.setattr("mitschreiber.cli._active_path", lambda: fake_path)
+
+    main(["status"])
+
+    captured = capsys.readouterr()
+    assert "No active session." in captured.out
+
+
+def test_stop_handles_corrupt_active_file(mock_session_dir, capsys):
+    active_file = mock_session_dir / "active.json"
+    active_file.write_text("not-json")
+
+    with patch("sys.argv", ["mitschreiber", "stop"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "No active session." in captured.out
+    assert not active_file.exists()
