@@ -20,5 +20,5 @@ mitschreiber = "mitschreiber.cli:main"
 manifest-path = "Cargo.toml"
 module-name = "mitschreiber._mitschreiber"
 
-[tool.uv]
-dev-dependencies = ["pytest", "requests"]
+[dependency-groups]
+dev = ["pytest", "requests", "maturin"]
