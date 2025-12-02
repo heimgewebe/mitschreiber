@@ -73,6 +73,8 @@ def cmd_stop(_):
 
         os.kill(pid, signal.SIGINT)
         print(f"Sent SIGINT to PID {pid}")
+    except (psutil.AccessDenied, PermissionError):
+        print(f"Stop failed: Permission denied when accessing PID {pid}.")
     except Exception as e:
         print(f"Stop hint: {e}")
         # In case of error (e.g. permission denied), we might want to cleanup if we are sure it's dead,

@@ -2,6 +2,7 @@
 from __future__ import annotations
 from pathlib import Path
 import json, fcntl, time
+import hashlib
 from typing import Dict, Any, Optional
 
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
@@ -36,9 +37,16 @@ class WalWriter:
             fcntl.flock(self.file, fcntl.LOCK_UN)
 
 def _emit_embed(state_evt: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """
+    STUB / PROTOTYPE
+    Generates a deterministic 'fake' embedding from the event state.
+    This is strictly for demo/testing purposes (Pipe-Integration & Schema)
+    and uses a SHA256 hash instead of a real ML model.
+
+    TODO: Replace with real local embedding model (e.g., via onnx/gguf).
+    """
     # Minimaler Stub: bildet ein deterministisches kleines „Embedding“
     # aus app+window Hash – genügt für Pipe-Integration & Schema-Form.
-    import hashlib
     text = f"{state_evt.get('app','')}|{state_evt.get('window','')}"
     h = hashlib.sha256(text.encode("utf-8")).hexdigest()
     # Achtung: Demo-Embedding mit 8 Werten
