@@ -23,10 +23,18 @@ def test_status_no_active_session(mock_session_dir, capsys):
     captured = capsys.readouterr()
     assert "No active session." in captured.out
 
-def test_status_active_session(mock_session_dir, capsys):
+@patch("psutil.Process")
+def test_status_active_session(mock_process_cls, mock_session_dir, capsys):
     active_file = mock_session_dir / "active.json"
-    active_data = {"session_id": "test-id", "pid": 12345, "flags": {}}
+    pid = 12345
+    active_data = {"session_id": "test-id", "pid": pid, "flags": {}}
     active_file.write_text(json.dumps(active_data))
+
+    # Mock the process to exist and be valid
+    mock_proc = MagicMock()
+    mock_proc.status.return_value = psutil.STATUS_RUNNING
+    mock_proc.cmdline.return_value = ["/path/to/python", "mitschreiber"]
+    mock_process_cls.return_value = mock_proc
 
     with patch("sys.argv", ["mitschreiber", "status"]):
         main()
