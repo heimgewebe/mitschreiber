@@ -34,16 +34,28 @@ def cmd_start(args):
         print("Session stopped.")
 
 def cmd_status(_):
-    if not _active_path().exists():
+    active = _active_path()
+    try:
+        if not active.exists():
+            print("No active session.")
+            return
+        # Defensive: file may disappear or be truncated between exists/read.
+        print(active.read_text(encoding="utf-8"))
+    except FileNotFoundError:
         print("No active session.")
-        return
-    print(_active_path().read_text(encoding="utf-8"))
 
 def cmd_stop(_):
-    if not _active_path().exists():
+    active = _active_path()
+    try:
+        if not active.exists():
+            print("No active session.")
+            return
+        meta = json.loads(active.read_text(encoding="utf-8"))
+    except (FileNotFoundError, json.JSONDecodeError):
         print("No active session.")
+        active.unlink(missing_ok=True)
         return
-    meta = json.loads(_active_path().read_text(encoding="utf-8"))
+
     pid = meta.get("pid")
     try:
         if not pid:
@@ -64,7 +76,7 @@ def cmd_stop(_):
     except Exception as e:
         print(f"Stop hint: {e}")
     finally:
-        _active_path().unlink(missing_ok=True)
+        active.unlink(missing_ok=True)
         print("Session stopped.")
 
 def main(argv=None):
