@@ -75,9 +75,18 @@ def cmd_stop(_):
         print(f"Sent SIGINT to PID {pid}")
     except Exception as e:
         print(f"Stop hint: {e}")
-    finally:
-        active.unlink(missing_ok=True)
-        print("Session stopped.")
+        # In case of error (e.g. permission denied), we might want to cleanup if we are sure it's dead,
+        # but safely we let the user retry or manually cleanup if force needed.
+        # But if the process is genuinely gone, we should cleanup.
+        if isinstance(e, ProcessLookupError) or (isinstance(e, OSError) and e.errno == 3): # ESRCH
+             active.unlink(missing_ok=True)
+
+    # Note: We do NOT unlink active.json here in the success case.
+    # The running process (cmd_start) owns the file and will unlink it in its finally block
+    # when it receives the SIGINT and shuts down.
+    # This prevents the race condition where cmd_stop deletes the file, and cmd_start tries to delete it again
+    # (which is harmless with missing_ok=True) or worse, cmd_start is still running and the file is gone,
+    # confusing status checks.
 
 def main(argv=None):
     p = argparse.ArgumentParser("mitschreiber")

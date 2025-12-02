@@ -13,6 +13,12 @@ on:
       - "contracts/**"
       - "export/*.jsonl"
       - "fixtures/**/*.jsonl"
+      - "src/**"
+      - "mitschreiber/**"
+      - "crates/**"
+      - "Cargo.toml"
+      - "pyproject.toml"
+      - "Justfile"
   push:
     branches: [main]
     paths:
@@ -22,6 +28,12 @@ on:
       - "contracts/**"
       - "export/*.jsonl"
       - "fixtures/**/*.jsonl"
+      - "src/**"
+      - "mitschreiber/**"
+      - "crates/**"
+      - "Cargo.toml"
+      - "pyproject.toml"
+      - "Justfile"
   workflow_dispatch:
 
 jobs:
