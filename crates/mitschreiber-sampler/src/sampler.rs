@@ -109,7 +109,14 @@ pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Vec<String>> {
     }
 }
 
-/// Simple probe to simulate changing state (replace with real X11/Wayland code)
+/// STUB / PROTOTYPE
+/// Simple probe to simulate changing state (replace with real X11/Wayland code).
+///
+/// This currently emits fake data ("firefox", "vscode") derived from a counter,
+/// strictly for testing the pipeline without privacy/OS-access issues.
+///
+/// TODO: Implement real OS-specific samplers (X11, Wayland, Windows) respecting
+/// privacy settings and Opt-In.
 fn probe_once(counter: u64) -> OsContextState {
     let ts = chrono::Utc::now().to_rfc3339();
     let app = if counter.is_multiple_of(3) { "firefox" } else { "vscode" };
