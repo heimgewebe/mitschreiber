@@ -90,27 +90,22 @@ pub fn stop_session(_py: Python, session_id: &str) -> PyResult<()> {
     Ok(())
 }
 
-/// Non-blockingly polls the last known state from the receiver channel.
+/// Non-blockingly polls all buffered states from the receiver channel.
 #[pyfunction]
-pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Option<String>> {
+pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Vec<String>> {
     let sessions = SESSIONS.lock();
     if let Some(session) = sessions.get(session_id) {
-        // Drain the channel and take the last element. This ensures that the Python
-        // client always gets the most up-to-date state, even if it's polling
-        // slower than the sampler is producing.
-        let last_state = session.rx.try_iter().last();
-
-        if let Some(state) = last_state {
+        // Collect all available events from the channel
+        let mut events = Vec::new();
+        for state in session.rx.try_iter() {
             let json = serde_json::to_string(&state)
                 .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("JSON serialization error: {}", e)))?;
-            Ok(Some(json))
-        } else {
-            // Channel was empty
-            Ok(None)
+            events.push(json);
         }
+        Ok(events)
     } else {
         // Session not found
-        Ok(None)
+        Ok(Vec::new())
     }
 }
 
@@ -147,9 +142,11 @@ mod tests {
             // Poll a few times to see if we get data
             let mut received_state = false;
             for _ in 0..5 {
-                if let Ok(Some(_)) = poll_state(py, sid) {
-                    received_state = true;
-                    break;
+                if let Ok(events) = poll_state(py, sid) {
+                    if !events.is_empty() {
+                        received_state = true;
+                        break;
+                    }
                 }
                 std::thread::sleep(std::time::Duration::from_millis(15));
             }

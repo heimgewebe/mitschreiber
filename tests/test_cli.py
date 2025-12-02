@@ -63,7 +63,10 @@ def test_stop_sends_signal(mock_process_cls, mock_kill, mock_session_dir, capsys
         main()
 
     mock_kill.assert_called_with(pid, signal.SIGINT)
-    assert not active_file.exists()
+    # Note: We no longer assert that active_file is gone, because 'stop' command
+    # delegates cleanup to the receiving process. In this test, the process is mocked
+    # and doesn't actually run/die, so the file remains.
+    # assert not active_file.exists()
     captured = capsys.readouterr()
     assert f"Sent SIGINT to PID {pid}" in captured.out
 

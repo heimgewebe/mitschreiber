@@ -11,12 +11,29 @@ from .paths import WAL_DIR, SESS_DIR
 # Use SESS_DIR for consistency with paths.py
 SESSIONS_DIR = SESS_DIR
 
-def _append_jsonl(path: Path, obj: Dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with open(path, "a", encoding="utf-8") as f:
-        fcntl.flock(f, fcntl.LOCK_EX)
-        f.write(json.dumps(obj, ensure_ascii=False) + "\n")
-        fcntl.flock(f, fcntl.LOCK_UN)
+class WalWriter:
+    def __init__(self, path: Path):
+        self.path = path
+        self.file = None
+
+    def __enter__(self):
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.file = open(self.path, "a", encoding="utf-8")
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if self.file:
+            self.file.close()
+
+    def append(self, obj: Dict[str, Any]):
+        if not self.file:
+            return
+        fcntl.flock(self.file, fcntl.LOCK_EX)
+        try:
+            self.file.write(json.dumps(obj, ensure_ascii=False) + "\n")
+            self.file.flush()
+        finally:
+            fcntl.flock(self.file, fcntl.LOCK_UN)
 
 def _emit_embed(state_evt: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     # Minimaler Stub: bildet ein deterministisches kleines „Embedding“
@@ -47,24 +64,40 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
     }
     start_session(session_id, cfg)
 
-    wal = WAL_DIR / f"session-{session_id}.jsonl"
+    wal_path = WAL_DIR / f"session-{session_id}.jsonl"
+
+    # Calculate poll interval in seconds
+    interval_sec = poll_ms / 1000.0
+
     try:
-        while True:
-            raw_evt = poll_state(session_id)  # -> dict oder None
-            if raw_evt:
-                evt = json.loads(raw_evt)
-                # Normalisieren & schreiben
-                evt["ts"] = now_iso()
-                evt["source"] = "os.context.state"
-                evt["session"] = session_id
-                _append_jsonl(wal, evt)
+        with WalWriter(wal_path) as writer:
+            next_tick = time.time()
+            while True:
+                # Poll state now returns a list of JSON strings
+                raw_events = poll_state(session_id)
 
-                if embed:
-                    eevt = _emit_embed(evt)
-                    if eevt:
-                        _append_jsonl(wal, eevt)
+                for raw_evt in raw_events:
+                    evt = json.loads(raw_evt)
+                    # Normalisieren & schreiben
+                    evt["ts"] = now_iso()
+                    evt["source"] = "os.context.state"
+                    evt["session"] = session_id
+                    writer.append(evt)
 
-            time.sleep(poll_ms / 1000.0)
+                    if embed:
+                        eevt = _emit_embed(evt)
+                        if eevt:
+                            writer.append(eevt)
+
+                # Drift-corrected sleep
+                next_tick += interval_sec
+                sleep_time = next_tick - time.time()
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
+                else:
+                    # If we are behind, just update next_tick to now to avoid burst catch-up
+                    next_tick = time.time()
+
     except KeyboardInterrupt:
         pass
     finally:
