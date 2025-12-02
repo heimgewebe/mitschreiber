@@ -39,8 +39,36 @@ def cmd_status(_):
         if not active.exists():
             print("No active session.")
             return
+
         # Defensive: file may disappear or be truncated between exists/read.
-        print(active.read_text(encoding="utf-8"))
+        content = active.read_text(encoding="utf-8")
+        try:
+            meta = json.loads(content)
+        except json.JSONDecodeError:
+            print("No active session (corrupt file).")
+            active.unlink(missing_ok=True)
+            return
+
+        pid = meta.get("pid")
+        if pid:
+            try:
+                p = psutil.Process(pid)
+                if p.status() == psutil.STATUS_ZOMBIE:
+                    raise psutil.NoSuchProcess(pid, "Zombie")
+
+                cmdline = " ".join(p.cmdline())
+                if "mitschreiber" not in cmdline:
+                    # Stale - PID reused or not ours
+                    print("No active session (stale file).")
+                    active.unlink(missing_ok=True)
+                    return
+            except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
+                print("No active session (stale file).")
+                active.unlink(missing_ok=True)
+                return
+
+        print(content)
+
     except FileNotFoundError:
         print("No active session.")
 
