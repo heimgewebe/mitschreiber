@@ -5,7 +5,8 @@ edition = "2021"
 
 [lib]
 name = "mitschreiber_core"
-crate-type = ["cdylib"]
+# Standard 'rlib' allows this crate to be used as a dependency in other Rust crates (like the root 'cdylib').
+# 'cdylib' is only for the final Python extension artifact.
 
 [dependencies]
 pyo3 = { version = "0.20.0" }
@@ -14,5 +15,6 @@ tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 http = "0.2"
 
 [features]
-extension-module = ["pyo3/extension-module"]
-default = ["extension-module"]
+# 'extension-module' should NOT be enabled for helper crates that are linked into the main extension.
+# It is only for the root 'cdylib'.
+default = []

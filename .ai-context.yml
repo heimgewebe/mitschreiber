@@ -9,9 +9,9 @@ ai_context_version: 1.0
 
 project:
   name: mitschreiber
-  summary: Scripted content capture/append utilities (JSONL).
+  summary: On-device context sampler & embedder (Rust/Python).
   role: producer_structured_notes
-  primary_language: bash
+  primary_language: Rust/Python
   visibility: internal
 
 dependencies:
@@ -20,7 +20,7 @@ dependencies:
       relationship: uses
       interface:
         - jsonl_line_schema
-    - name: leitstand
+    - name: chronik
       relationship: uses
       interface:
         - http_ingest_optional
@@ -29,10 +29,12 @@ dependencies:
 
 architecture:
   entrypoints:
-    - scripts/*.sh
+    - mitschreiber (Python CLI)
   key_paths:
-    - path: lib/locking.sh
-      purpose: atomic append
+    - path: src/lib.rs
+      purpose: Python/Rust FFI entrypoint
+    - path: mitschreiber/cli.py
+      purpose: CLI entrypoint
   data_flow:
     input: user/agent inputs
     processing: normalize → validate
