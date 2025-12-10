@@ -102,3 +102,15 @@ def test_stop_handles_corrupt_active_file(mock_session_dir, capsys):
     captured = capsys.readouterr()
     assert "No active session." in captured.out
     assert not active_file.exists()
+
+
+def test_stop_handles_missing_pid(mock_session_dir, capsys):
+    active_file = mock_session_dir / "active.json"
+    active_file.write_text(json.dumps({"session_id": "abc", "flags": {}}))
+
+    with patch("sys.argv", ["mitschreiber", "stop"]):
+        main()
+
+    captured = capsys.readouterr()
+    assert "No active session." in captured.out
+    assert not active_file.exists()

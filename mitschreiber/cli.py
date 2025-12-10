@@ -87,6 +87,8 @@ def cmd_stop(_):
     pid = meta.get("pid")
     try:
         if not pid:
+            print("No active session.")
+            active.unlink(missing_ok=True)
             return
         try:
             p = psutil.Process(pid)
@@ -109,7 +111,7 @@ def cmd_stop(_):
         # but safely we let the user retry or manually cleanup if force needed.
         # But if the process is genuinely gone, we should cleanup.
         if isinstance(e, ProcessLookupError) or (isinstance(e, OSError) and e.errno == 3): # ESRCH
-             active.unlink(missing_ok=True)
+            active.unlink(missing_ok=True)
 
     # Note: We do NOT unlink active.json here in the success case.
     # The running process (cmd_start) owns the file and will unlink it in its finally block
