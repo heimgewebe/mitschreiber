@@ -1,56 +1,51 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://schemas.heimgewebe.org/os.context.text.embed.schema.json",
-  "title": "OS Context Text Embed Event",
-  "description": "Contract für persistierbare OS-Kontext-Events ohne Rohtext (JSONL: 1 Objekt pro Zeile).",
+  "$id": "https://raw.githubusercontent.com/heimgewebe/metarepo/contracts-v1/contracts/os.context.text.embed.schema.json",
+  "title": "os.context.text.embed",
+  "description": "Persistenter, privacy-sicherer Output aus Mitschreiber: Embeddings + Keyphrases, kein Rohtext.",
   "type": "object",
   "additionalProperties": false,
   "properties": {
     "ts": {
       "type": "string",
       "format": "date-time",
-      "description": "Zeitstempel des Events im ISO-8601-Format."
-    },
-    "source": {
-      "type": "string",
-      "const": "os.context.text.embed",
-      "description": "Event-Type Identifier."
-    },
-    "session": {
-      "type": "string",
-      "minLength": 1,
-      "description": "Session- oder Conversation-Identifier des mitschreiber-Dienstes."
+      "description": "Zeitpunkt der Extraktion."
     },
     "app": {
       "type": "string",
-      "pattern": "^[a-z0-9._-]{1,128}$",
-      "description": "Name der aktiven Anwendung (lowercase, Ziffern, Punkt, Unterstrich, Bindestrich)."
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Ursprungs-App (z. B. code, obsidian, firefox)."
     },
     "window": {
       "type": "string",
-      "minLength": 1,
-      "description": "Fenster- oder Dokumenttitel des Events."
+      "maxLength": 512,
+      "description": "Fenster-/Dokumentkontext (ggf. redigiert)."
     },
     "keyphrases": {
       "type": "array",
+      "minItems": 1,
+      "maxItems": 64,
       "items": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "maxLength": 96
       },
-      "description": "Schlüsselbegriffe, extrahiert aus dem redigierten Kontext."
+      "description": "Extrahierte Schlüsselbegriffe (privacy-freundlich)."
     },
     "embedding": {
       "type": "array",
+      "minItems": 8,
+      "maxItems": 4096,
       "items": {
         "type": "number"
       },
-      "minItems": 1,
-      "description": "Embedding-Vektor als Liste von Fließkommazahlen."
+      "description": "Numerischer Vektor (on-device berechnet, normiert)."
     },
     "hash_id": {
       "type": "string",
-      "pattern": "^sha256:[a-f0-9]{64}$",
-      "description": "Deterministischer SHA-256-Hash über die Snippet-Basisdaten."
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 oder äquivalenter Hash zur Dedup-/Audit-Zuordnung."
     },
     "privacy": {
       "type": "object",
@@ -59,27 +54,66 @@
         "raw_retained": {
           "type": "boolean",
           "const": false,
-          "description": "Flag, ob Rohtext gespeichert wurde (immer false)."
+          "description": "Rohtext wurde NICHT persistiert."
+        },
+        "detector_ver": {
+          "type": "string",
+          "maxLength": 32,
+          "description": "Version des PII/Secret-Detektors."
+        },
+        "pii_gate": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "min_confidence": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "enum": ["drop_and_shred", "mask", "allow"]
+              },
+              "maxItems": 8
+            }
+          }
         }
       },
-      "required": ["raw_retained"],
-      "description": "Privacy-Garantie für dieses Event."
+      "required": ["raw_retained"]
     },
-    "meta": {
-      "type": "object",
-      "additionalProperties": true,
-      "description": "Optionale Metadaten (z. B. Modellbezeichner)."
+    "source": {
+      "type": "string",
+      "maxLength": 64,
+      "description": "Sensorquelle (default: mitschreiber)."
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 64 },
+      "maxItems": 32,
+      "description": "Optionale kontextuelle Labels (z. B. workspace, project)."
     }
   },
-  "required": [
-    "ts",
-    "source",
-    "session",
-    "app",
-    "window",
-    "keyphrases",
-    "embedding",
-    "hash_id",
-    "privacy"
+  "required": ["ts", "app", "keyphrases", "embedding", "hash_id", "privacy"],
+  "examples": [
+    {
+      "ts": "2025-10-05T10:16:40Z",
+      "app": "code",
+      "window": "project-x/main.py — Visual Studio Code",
+      "keyphrases": ["embedding pipeline", "PII gating", "redaction"],
+      "embedding": [0.012, -0.044, 0.331, 0.002, -0.118, 0.091, 0.007, -0.023],
+      "hash_id": "b6c0b4d2e3f9f1f9b8a7a6d5c4b3a291eeaa4b4430f8af4b3d3c0d3a0c9b6a11",
+      "privacy": {
+        "raw_retained": false,
+        "detector_ver": "v1.2.0",
+        "pii_gate": {
+          "min_confidence": 0.6,
+          "actions": ["drop_and_shred"]
+        }
+      },
+      "source": "mitschreiber",
+      "tags": ["workspace:dev", "project:project-x"]
+    }
   ]
 }
