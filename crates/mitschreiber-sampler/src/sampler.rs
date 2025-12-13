@@ -11,12 +11,44 @@ use std::thread::{self, JoinHandle};
 use std::time::Duration;
 use crossbeam_channel::{unbounded, Sender, Receiver};
 
+#[cfg(feature = "x11")]
+use crate::x11::X11Sampler;
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct OsContextState {
     pub ts: String,
     pub app: String,
     pub window: String,
     pub clipboard: Option<String>,
+}
+
+trait Sampler: Send {
+    fn probe(&mut self, counter: u64) -> OsContextState;
+}
+
+struct StubSampler;
+impl Sampler for StubSampler {
+    fn probe(&mut self, counter: u64) -> OsContextState {
+        let ts = chrono::Utc::now().to_rfc3339();
+        let app = if counter % 3 == 0 { "firefox" } else { "vscode" };
+        let window = if counter % 5 == 0 { "README.md" } else { "Editor" };
+        OsContextState {
+            ts,
+            app: app.to_string(),
+            window: window.to_string(),
+            clipboard: None,
+        }
+    }
+}
+
+#[cfg(feature = "x11")]
+struct X11SamplerWrapper(X11Sampler);
+
+#[cfg(feature = "x11")]
+impl Sampler for X11SamplerWrapper {
+    fn probe(&mut self, _counter: u64) -> OsContextState {
+        self.0.get_state()
+    }
 }
 
 /// Per-session controller, holding the communication channel
@@ -53,9 +85,29 @@ pub fn start_session(_py: Python, session_id: &str, cfg: &PyDict) -> PyResult<()
     // Background thread owns the sender
     let handle = thread::spawn(move || {
         let mut counter: u64 = 0;
+
+        #[allow(unused_mut)]
+        let mut sampler: Box<dyn Sampler> = {
+            #[cfg(feature = "x11")]
+            {
+                match X11Sampler::new() {
+                    Ok(s) => Box::new(X11SamplerWrapper(s)),
+                    Err(e) => {
+                        // Use println/eprintln as simple logging fallback if env_logger not init
+                        eprintln!("Warning: Failed to initialize X11 sampler, falling back to Stub. Error: {}", e);
+                        Box::new(StubSampler)
+                    }
+                }
+            }
+            #[cfg(not(feature = "x11"))]
+            {
+                Box::new(StubSampler)
+            }
+        };
+
         let poll_interval = Duration::from_millis(poll_interval_ms);
         while thread_alive.load(Ordering::SeqCst) {
-            let state = probe_once(counter);
+            let state = sampler.probe(counter);
             if tx.send(state).is_err() {
                 // Stop if the receiver has been dropped
                 break;
@@ -106,26 +158,6 @@ pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Vec<String>> {
     } else {
         // Session not found
         Ok(Vec::new())
-    }
-}
-
-/// STUB / PROTOTYPE
-/// Simple probe to simulate changing state (replace with real X11/Wayland code).
-///
-/// This currently emits fake data ("firefox", "vscode") derived from a counter,
-/// strictly for testing the pipeline without privacy/OS-access issues.
-///
-/// TODO: Implement real OS-specific samplers (X11, Wayland, Windows) respecting
-/// privacy settings and Opt-In.
-fn probe_once(counter: u64) -> OsContextState {
-    let ts = chrono::Utc::now().to_rfc3339();
-    let app = if counter.is_multiple_of(3) { "firefox" } else { "vscode" };
-    let window = if counter.is_multiple_of(5) { "README.md" } else { "Editor" };
-    OsContextState {
-        ts,
-        app: app.to_string(),
-        window: window.to_string(),
-        clipboard: None,
     }
 }
 
