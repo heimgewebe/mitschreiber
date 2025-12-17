@@ -5,7 +5,7 @@
 system_context:
   heimgeist: "../metarepo/ai-contexts/heimgeist.ai-context.yml"
 
-ai_context_version: 1.0
+ai_context_version: 1.1
 
 project:
   name: mitschreiber
@@ -13,6 +13,30 @@ project:
   role: producer_structured_notes
   primary_language: Rust/Python
   visibility: internal
+
+heimgewebe:
+  axis:
+    - Events
+    - Semantik
+    - Motorik
+  fleet:
+    enabled: true
+  wgx:
+    profile_expected: true
+    guard_smoke_expected: true
+
+interfaces:
+  consumes:
+    - "x11.events"
+    - "user.input"
+  produces:
+    - "event.line"
+    - "export/*.jsonl"
+
+contracts:
+  schemas:
+    - path: "contracts/*.schema.json"
+      note: "Reference canonical schemas; do not fork lightly."
 
 dependencies:
   internal:
@@ -26,6 +50,8 @@ dependencies:
         - http_ingest_optional
   external:
     - name: jq
+    - name: bash
+      version: ">=4"
 
 architecture:
   entrypoints:
@@ -39,6 +65,14 @@ architecture:
     input: user/agent inputs
     processing: normalize → validate
     output: append *.jsonl
+
+boundaries:
+  not_responsible_for:
+    - "Doing network ingest without aussensensor"
+    - "Permanently storing data beyond local retention"
+  dangerous_assumptions:
+    - "Assume repo is Fleet-enabled without checking .wgx/"
+    - "Assume X11 is always available (must handle headless)"
 
 conventions:
   branching: "main, feature/*"
