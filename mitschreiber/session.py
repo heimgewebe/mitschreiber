@@ -87,7 +87,9 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
                 for raw_evt in raw_events:
                     evt = json.loads(raw_evt)
                     # Normalisieren & schreiben
-                    evt["ts"] = now_iso()
+                    # Note: We prefer the timestamp from Rust (evt["ts"]) if available for precision
+                    if "ts" not in evt:
+                        evt["ts"] = now_iso()
                     evt["source"] = "os.context.state"
                     evt["session"] = session_id
                     writer.append(evt)
