@@ -9,7 +9,7 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
-use crossbeam_channel::{unbounded, Sender, Receiver};
+use crossbeam_channel::{bounded, Sender, Receiver};
 
 #[cfg(feature = "x11")]
 use crate::x11::X11Sampler;
@@ -78,7 +78,9 @@ pub fn start_session(_py: Python, session_id: &str, cfg: &PyDict) -> PyResult<()
         return Ok(()); // Already running
     }
 
-    let (tx, rx): (Sender<OsContextState>, Receiver<OsContextState>) = unbounded();
+    // Use a bounded channel to prevent memory leaks if the consumer (Python) is too slow
+    // or stalled. Dropping new events is preferable to OOM.
+    let (tx, rx): (Sender<OsContextState>, Receiver<OsContextState>) = bounded(10_000);
     let alive = Arc::new(AtomicBool::new(true));
     let thread_alive = Arc::clone(&alive);
 

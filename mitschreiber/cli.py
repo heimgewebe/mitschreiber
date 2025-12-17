@@ -56,12 +56,11 @@ def cmd_status(_):
                 if p.status() == psutil.STATUS_ZOMBIE:
                     raise psutil.NoSuchProcess(pid, "Zombie")
 
-                cmdline = " ".join(p.cmdline())
-                if "mitschreiber" not in cmdline:
-                    # Stale - PID reused or not ours
-                    print("No active session (stale file).")
-                    active.unlink(missing_ok=True)
-                    return
+                # Verify it's a python process or related to us.
+                # Stricter check "mitschreiber in cmdline" is too fragile (renames, wrappers).
+                # If we can access the process and it is not a Zombie, we assume it is ours
+                # because the PID file is inside our private data directory.
+                pass
             except (psutil.NoSuchProcess, psutil.ZombieProcess, psutil.AccessDenied):
                 print("No active session (stale file).")
                 active.unlink(missing_ok=True)
@@ -92,15 +91,14 @@ def cmd_stop(_):
             return
         try:
             p = psutil.Process(pid)
-            # Check if the process name or command line contains "mitschreiber"
-            cmdline = " ".join(p.cmdline())
-            if "mitschreiber" not in cmdline:
-                print(f"PID {pid} is not a mitschreiber process. Stale session file.")
-                return
+            if p.status() == psutil.STATUS_ZOMBIE:
+                raise psutil.NoSuchProcess(pid, "Zombie")
         except psutil.NoSuchProcess:
             print(f"Process {pid} not found. Stale session file.")
             return
 
+        # We trust the PID from our private active.json.
+        # If the PID was reused by a root process, os.kill will raise PermissionError, which we handle.
         os.kill(pid, signal.SIGINT)
         print(f"Sent SIGINT to PID {pid}")
     except (psutil.AccessDenied, PermissionError):
