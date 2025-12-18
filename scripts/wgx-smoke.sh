@@ -3,6 +3,20 @@ set -euo pipefail
 
 echo "[wgx.smoke] mitschreiber – schneller Grundcheck"
 
+# Ensure jq is present (required for metrics snapshot)
+if ! command -v jq >/dev/null 2>&1; then
+  echo "[wgx.smoke] jq fehlt – bitte installieren." >&2
+  exit 1
+fi
+
+# Ensure basic POSIX tools
+for cmd in date hostname; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "[wgx.smoke] $cmd fehlt – bitte installieren." >&2
+    exit 1
+  fi
+done
+
 if command -v cargo >/dev/null 2>&1; then
   cargo build --workspace --quiet
 else

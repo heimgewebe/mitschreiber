@@ -35,7 +35,7 @@ zum Beispiel:
   wgx snapshot
 
 EOF
-  echo "Hinweis: Profil liegt in .wgx/profile.yml, nur einfache 'tasks.<name> = einzeiliger Befehl' werden unterstützt." >&2
+  echo "Hinweis: Profil liegt in .wgx/profile.yml. Tasks können einzeilig sein; YAML-Block-Strings (|) werden unterstützt und vor Ausführung bereinigt." >&2
   exit 1
 fi
 
