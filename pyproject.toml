@@ -19,6 +19,7 @@ mitschreiber = "mitschreiber.cli:main"
 [tool.maturin]
 manifest-path = "Cargo.toml"
 module-name = "mitschreiber._mitschreiber"
+features = ["extension-module"]
 
 [dependency-groups]
 dev = ["pytest", "requests", "maturin"]

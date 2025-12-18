@@ -13,7 +13,7 @@ mitschreiber-sampler = { path = "crates/mitschreiber-sampler" }
 
 [features]
 extension-module = ["pyo3/extension-module"]
-default = ["extension-module"]
+default = []
 
 [dev-dependencies]
 pyo3 = { version = "0.20.0", features = ["auto-initialize"] }

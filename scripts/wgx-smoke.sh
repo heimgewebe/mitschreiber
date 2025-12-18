@@ -10,6 +10,9 @@ else
 fi
 
 if command -v uv >/dev/null 2>&1; then
+  # Build & install das Python-Extension-Modul in die uv-Umgebung,
+  # damit der Import-Test wirklich das ausgelieferte Artefakt prüft.
+  uv run --group dev maturin develop --quiet
   uv run python - <<'PY'
 try:
     import mitschreiber  # noqa: F401
