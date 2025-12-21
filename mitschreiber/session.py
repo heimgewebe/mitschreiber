@@ -1,14 +1,16 @@
 # mitschreiber/session.py
 from __future__ import annotations
 from pathlib import Path
-import json, fcntl, time
+import fcntl
 import hashlib
+import json
+import sys
+import time
 from typing import Dict, Any, Optional
 
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
 from .util import now_iso
 from .paths import WAL_DIR, SESS_DIR
-import sys
 
 try:
     from .embed import build_embed_event
