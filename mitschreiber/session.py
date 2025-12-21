@@ -9,6 +9,12 @@ from mitschreiber._mitschreiber import start_session, stop_session, poll_state
 from .util import now_iso
 from .paths import WAL_DIR, SESS_DIR
 
+try:
+    from .embed import build_embed_event
+    HAS_EMBED = True
+except ImportError:
+    HAS_EMBED = False
+
 # Use SESS_DIR for consistency with paths.py
 SESSIONS_DIR = SESS_DIR
 
@@ -95,7 +101,19 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
                     writer.append(evt)
 
                     if embed:
-                        eevt = _emit_embed(evt)
+                        if HAS_EMBED:
+                            # Use real embedding logic if available
+                            text_content = f"{evt.get('app', '')}|{evt.get('window', '')}"
+                            eevt, _ = build_embed_event(
+                                text=text_content,
+                                session=session_id,
+                                app=evt.get("app", ""),
+                                window=evt.get("window", "")
+                            )
+                        else:
+                            # Fallback to stub
+                            eevt = _emit_embed(evt)
+
                         if eevt:
                             writer.append(eevt)
 
