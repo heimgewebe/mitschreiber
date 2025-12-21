@@ -8,12 +8,33 @@ from typing import Dict, Any, Optional
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
 from .util import now_iso
 from .paths import WAL_DIR, SESS_DIR
+import sys
 
 try:
     from .embed import build_embed_event
     HAS_EMBED = True
-except ImportError:
+    EMBED_IMPORT_ERROR = None
+except Exception as e:
     HAS_EMBED = False
+    EMBED_IMPORT_ERROR = e
+
+_WARNED_EMBED_FALLBACK = False
+
+
+def _embed_text_from_evt(evt: dict) -> str | None:
+    """
+    Build a stable, low-noise text representation for embedding.
+    Prefer concrete fields when present; skip empty payloads.
+    """
+    parts: list[str] = []
+    for k in ("app", "window", "url", "path"):
+        v = evt.get(k)
+        if v:
+            s = str(v).strip()
+            if s:
+                parts.append(s)
+    text = " | ".join(parts).strip()
+    return text if text else None
 
 # Use SESS_DIR for consistency with paths.py
 SESSIONS_DIR = SESS_DIR
@@ -103,7 +124,10 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
                     if embed:
                         if HAS_EMBED:
                             # Use real embedding logic if available
-                            text_content = f"{evt.get('app', '')}|{evt.get('window', '')}"
+                            text_content = _embed_text_from_evt(evt)
+                            if not text_content:
+                                # Nothing meaningful to embed
+                                continue
                             eevt, _ = build_embed_event(
                                 text=text_content,
                                 session=session_id,
@@ -112,6 +136,13 @@ def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
                             )
                         else:
                             # Fallback to stub
+                            global _WARNED_EMBED_FALLBACK
+                            if not _WARNED_EMBED_FALLBACK:
+                                msg = "mitschreiber: --embed requested but embed module unavailable; using stub fallback"
+                                if EMBED_IMPORT_ERROR is not None:
+                                    msg += f" (reason: {EMBED_IMPORT_ERROR!r})"
+                                print(msg, file=sys.stderr)
+                                _WARNED_EMBED_FALLBACK = True
                             eevt = _emit_embed(evt)
 
                         if eevt:
