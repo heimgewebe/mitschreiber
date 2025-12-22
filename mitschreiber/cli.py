@@ -95,6 +95,7 @@ def cmd_stop(_):
                 raise psutil.NoSuchProcess(pid, "Zombie")
         except psutil.NoSuchProcess:
             print(f"Process {pid} not found. Stale session file.")
+            active.unlink(missing_ok=True)
             return
 
         # We trust the PID from our private active.json.
