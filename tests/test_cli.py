@@ -149,7 +149,6 @@ def test_stop_cleans_stale_session_on_access_denied(mock_session_dir, capsys):
 
     captured = capsys.readouterr()
 
-    # Verify we get the permission denied message (which is current behavior)
-    # BUT we also want to verify the file is gone (desired fix).
-    # Currently this will FAIL because the file is not removed.
+    # Verify we get the permission denied message
+    # AND verify the file is gone (desired fix).
     assert not active_file.exists(), "Stale session file should be removed on AccessDenied"
