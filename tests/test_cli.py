@@ -130,3 +130,26 @@ def test_stop_cleans_stale_process_file(mock_session_dir, capsys):
     captured = capsys.readouterr()
     assert "Stale session file." in captured.out
     assert not active_file.exists()
+
+
+def test_stop_cleans_stale_session_on_access_denied(mock_session_dir, capsys):
+    """
+    If psutil.Process() raises AccessDenied, it means the PID belongs to another user/root,
+    so it cannot be our session. The session file is stale.
+    """
+    active_file = mock_session_dir / "active.json"
+    pid = 99999
+    active_file.write_text(json.dumps({"session_id": "abc", "pid": pid, "flags": {}}))
+
+    with (
+        patch("psutil.Process", side_effect=psutil.AccessDenied(pid)),
+        patch("sys.argv", ["mitschreiber", "stop"]),
+    ):
+        main()
+
+    captured = capsys.readouterr()
+
+    # Verify we get the permission denied message (which is current behavior)
+    # BUT we also want to verify the file is gone (desired fix).
+    # Currently this will FAIL because the file is not removed.
+    assert not active_file.exists(), "Stale session file should be removed on AccessDenied"

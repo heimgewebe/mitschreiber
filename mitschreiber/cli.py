@@ -103,7 +103,11 @@ def cmd_stop(_):
         os.kill(pid, signal.SIGINT)
         print(f"Sent SIGINT to PID {pid}")
     except (psutil.AccessDenied, PermissionError):
-        print(f"Stop failed: Permission denied when accessing PID {pid}.")
+        # AccessDenied: The process exists but is not ours (e.g. reused by another user/root).
+        # PermissionError: Same for os.kill.
+        # In both cases, the PID in our local active.json does NOT refer to our session anymore.
+        print(f"Process {pid} is not accessible (likely PID reuse). Stale session file.")
+        active.unlink(missing_ok=True)
     except Exception as e:
         print(f"Stop hint: {e}")
         # In case of error (e.g. permission denied), we might want to cleanup if we are sure it's dead,
