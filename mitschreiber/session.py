@@ -11,7 +11,6 @@ from typing import Dict, Any, Optional
 from mitschreiber._mitschreiber import start_session, stop_session, poll_state
 from .util import now_iso
 from .paths import WAL_DIR, SESS_DIR
-import sys
 
 try:
     from .embed import build_embed_event
@@ -95,6 +94,8 @@ def _emit_embed(state_evt: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     }
 
 def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
+    if poll_ms <= 0:
+        raise ValueError(f"poll_ms must be positive (got {poll_ms})")
     cfg = {
         "clipboard_allowed": bool(clipboard),
         "screenshots_allowed": False,
