@@ -14,7 +14,7 @@ def _positive_int(value: str) -> int:
     except ValueError as exc:
         raise argparse.ArgumentTypeError("must be a positive integer") from exc
     if parsed <= 0:
-        raise argparse.ArgumentTypeError("must be a positive integer")
+        raise argparse.ArgumentTypeError("must be a positive integer (greater than zero)")
     return parsed
 
 def cmd_start(args):
