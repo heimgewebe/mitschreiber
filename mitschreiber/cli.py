@@ -8,6 +8,15 @@ from .session import run_session, SESSIONS_DIR
 def _active_path() -> Path:
     return SESSIONS_DIR / "active.json"
 
+def _positive_int(value: str) -> int:
+    try:
+        parsed = int(value)
+    except ValueError as exc:
+        raise argparse.ArgumentTypeError("must be a positive integer") from exc
+    if parsed <= 0:
+        raise argparse.ArgumentTypeError("must be a positive integer")
+    return parsed
+
 def cmd_start(args):
     sid = str(uuid.uuid4())
     active = {
@@ -24,10 +33,15 @@ def cmd_start(args):
     print(f"Session {sid} active (embed={args.embed}, clipboard={args.clipboard}, poll={args.poll_interval}ms)")
     try:
         # Übergibt in den Event-Loop (blockiert bis Ctrl+C)
-        run_session(session_id=sid,
-                    embed=args.embed,
-                    clipboard=args.clipboard,
-                    poll_ms=int(args.poll_interval))
+        run_session(
+            session_id=sid,
+            embed=args.embed,
+            clipboard=args.clipboard,
+            poll_ms=int(args.poll_interval),
+        )
+    except ValueError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
     finally:
         # Nach Beendigung (sauber oder via Crash)
         _active_path().unlink(missing_ok=True)
@@ -134,7 +148,12 @@ def main(argv=None):
     s_start = sub.add_parser("start")
     s_start.add_argument("--embed", action="store_true")
     s_start.add_argument("--clipboard", action="store_true")
-    s_start.add_argument("--poll-interval", type=int, default=500)
+    s_start.add_argument(
+        "--poll-interval",
+        type=_positive_int,
+        default=500,
+        help="Polling interval in milliseconds (positive integer).",
+    )
     s_start.set_defaults(fn=cmd_start)
 
     s_status = sub.add_parser("status")
