@@ -2,7 +2,7 @@
 # Beispielprofil für mitschreiber – minimal, CI-sicher.
 # Das produktive Profil liegt in `.wgx/profile.yml`.
 
-# no exotic whitespace
+# no exotic whitespace (NBSP, tabs)
 profile: mitschreiber-example
 description: "Minimal example WGX profile for mitschreiber"
 wgx-version: ">=1.0.0"
