@@ -2,6 +2,7 @@
 # Beispielprofil für mitschreiber – minimal, CI-sicher.
 # Das produktive Profil liegt in `.wgx/profile.yml`.
 
+# no exotic whitespace
 profile: mitschreiber-example
 description: "Minimal example WGX profile for mitschreiber"
 wgx-version: ">=1.0.0"
@@ -9,10 +10,10 @@ wgx-version: ">=1.0.0"
 class: rust-python-hybrid
 
 tasks:
-  # Sehr leichter Smoke-Test, der auch auf nackten Clones nicht scheitert.
-  smoke: "echo '[wgx.smoke] mitschreiber example profile – repo erreichbar'"
+  # Sehr leichter Smoke-Test, der auch auf nackten Clones nicht scheitert.
+  smoke: "echo '[wgx.smoke] mitschreiber example profile – repo erreichbar'"
 
-  # Platzhalter, damit Guard-Checks ein definiertes Feld vorfinden.
-  guard: "echo '[wgx.guard] example profile – bitte .wgx/profile.yml pflegen'"
+  # Platzhalter, damit Guard-Checks ein definiertes Feld vorfinden.
+  guard: "echo '[wgx.guard] example profile – bitte .wgx/profile.yml pflegen'"
 
-  metrics: "echo '[wgx.metrics] example profile – verwendet scripts/wgx-metrics-snapshot.sh im echten Profil'"
+  metrics: "echo '[wgx.metrics] example profile – verwendet scripts/wgx-metrics-snapshot.sh im echten Profil'"
