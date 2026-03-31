@@ -8,7 +8,6 @@ import psutil
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 from mitschreiber.cli import main, _active_path
-from mitschreiber.session import run_session
 
 @pytest.fixture
 def mock_session_dir(tmp_path):

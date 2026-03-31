@@ -110,9 +110,16 @@ pub fn start_session(_py: Python, session_id: &str, cfg: &PyDict) -> PyResult<()
         let poll_interval = Duration::from_millis(poll_interval_ms);
         while thread_alive.load(Ordering::SeqCst) {
             let state = sampler.probe(counter);
-            if tx.send(state).is_err() {
-                // Stop if the receiver has been dropped
-                break;
+            match tx.try_send(state) {
+                Ok(()) => {}
+                Err(crossbeam_channel::TrySendError::Full(_)) => {
+                    // Drop event to avoid blocking / deadlock when
+                    // the consumer (Python poll_state) is too slow.
+                }
+                Err(crossbeam_channel::TrySendError::Disconnected(_)) => {
+                    // Receiver dropped – stop the thread.
+                    break;
+                }
             }
             counter = counter.wrapping_add(1);
             thread::sleep(poll_interval);
