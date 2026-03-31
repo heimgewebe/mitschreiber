@@ -96,7 +96,7 @@ impl X11Sampler {
 
                 let parts: Vec<&[u8]> = reply_class.value.split(|&b| b == 0).filter(|p| !p.is_empty()).collect();
                 // WM_CLASS contains [instance, class] separated by NUL.
-                // Prefer the class name (last); falls back to instance (first) for single-entry values.
+                // Use the last non-empty part (class when both present, instance when only one).
                 if let Some(cls) = parts.last() {
                     w_app = String::from_utf8_lossy(cls).to_string();
                 }
