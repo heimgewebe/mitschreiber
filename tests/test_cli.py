@@ -151,3 +151,22 @@ def test_stop_cleans_stale_session_on_access_denied(mock_session_dir, capsys):
     # Verify we get the permission denied message
     # AND verify the file is gone (desired fix).
     assert not active_file.exists(), "Stale session file should be removed on AccessDenied"
+
+
+def test_init_directories_creates_all_dirs(tmp_path):
+    """init_directories() must create DATA_HOME, WAL_DIR, and SESS_DIR."""
+    from mitschreiber import paths
+    from unittest.mock import patch as _patch
+
+    data_home = tmp_path / "mitschreiber"
+    wal_dir = data_home / "wal"
+    sess_dir = data_home / "sessions"
+
+    with _patch.object(paths, "DATA_HOME", data_home), \
+         _patch.object(paths, "WAL_DIR", wal_dir), \
+         _patch.object(paths, "SESS_DIR", sess_dir):
+        paths.init_directories()
+
+    assert data_home.exists(), "DATA_HOME should be created"
+    assert wal_dir.exists(), "WAL_DIR should be created"
+    assert sess_dir.exists(), "SESS_DIR should be created"
