@@ -4,6 +4,20 @@ use x11rb::protocol::xproto::{ConnectionExt, AtomEnum};
 use crate::sampler::OsContextState;
 use std::error::Error;
 
+/// Parses a raw `WM_CLASS` property value into an application name.
+///
+/// `WM_CLASS` stores `"instance\0class\0"` (two NUL-terminated strings).
+/// We use the **last** non-empty part, which is the class name when both
+/// parts are present, or the instance name when only one part exists.
+/// Returns an empty string when the value is empty or contains only NUL bytes.
+fn parse_wm_class(raw: &[u8]) -> String {
+    raw.split(|&b| b == 0)
+        .filter(|p| !p.is_empty())
+        .last()
+        .map(|cls| String::from_utf8_lossy(cls).into_owned())
+        .unwrap_or_default()
+}
+
 pub struct X11Sampler {
     conn: RustConnection,
     root: u32,
@@ -55,7 +69,6 @@ impl X11Sampler {
 
             if let Some(active_window) = reply.value32().and_then(|mut v| v.next()) {
                 let mut w_title = String::new();
-                let mut w_app = String::new();
 
                 // 1. Try _NET_WM_NAME (UTF8)
                 let reply_utf8 = self.conn.get_property(
@@ -94,12 +107,9 @@ impl X11Sampler {
                     1024
                 )?.reply()?;
 
-                let parts: Vec<&[u8]> = reply_class.value.split(|&b| b == 0).filter(|p| !p.is_empty()).collect();
-                if let Some(cls) = parts.last() {
-                    w_app = String::from_utf8_lossy(cls).to_string();
-                } else if let Some(inst) = parts.first() {
-                     w_app = String::from_utf8_lossy(inst).to_string();
-                }
+                // WM_CLASS contains [instance, class] separated by NUL.
+                // Use the last non-empty part (class when both present, instance when only one).
+                let w_app = parse_wm_class(&reply_class.value);
 
                 Ok((w_app, w_title))
             } else {
@@ -121,5 +131,29 @@ impl X11Sampler {
             window,
             clipboard: None,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_wm_class;
+
+    #[test]
+    fn wm_class_two_parts_returns_class() {
+        // Normal case: "instance\0class\0" — prefer the class name (last part).
+        assert_eq!(parse_wm_class(b"firefox\0Firefox\0"), "Firefox");
+    }
+
+    #[test]
+    fn wm_class_single_part_returns_instance() {
+        // Some apps provide only one NUL-terminated entry; return that entry.
+        assert_eq!(parse_wm_class(b"code\0"), "code");
+    }
+
+    #[test]
+    fn wm_class_empty_returns_empty_string() {
+        // Empty value and NUL-only value both map to the empty string.
+        assert_eq!(parse_wm_class(b""), "");
+        assert_eq!(parse_wm_class(b"\0\0"), "");
     }
 }
