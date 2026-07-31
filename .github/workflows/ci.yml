@@ -16,4 +16,4 @@ jobs:
     uses: heimgewebe/metarepo/.github/workflows/reusable-ci.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
     with:
       run_lint: true
-      run_tests: false
+      run_tests: true
