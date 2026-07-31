@@ -8,7 +8,7 @@ name = "mitschreiber"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.20.0" }
+pyo3 = { version = "0.29.0" }
 mitschreiber-sampler = { path = "crates/mitschreiber-sampler" }
 
 [features]
@@ -16,7 +16,7 @@ extension-module = ["pyo3/extension-module"]
 default = []
 
 [dev-dependencies]
-pyo3 = { version = "0.20.0", features = ["auto-initialize"] }
+pyo3 = { version = "0.29.0", features = ["auto-initialize"] }
 
 [workspace]
 members = [

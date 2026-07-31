@@ -9,7 +9,7 @@ name = "mitschreiber_core"
 # 'cdylib' is only for the final Python extension artifact.
 
 [dependencies]
-pyo3 = { version = "0.20.0" }
+pyo3 = { version = "0.29.0" }
 reqwest = { version = "0.11", features = ["json"] }
 tokio = { version = "1", features = ["macros", "rt-multi-thread"] }
 http = "0.2"
