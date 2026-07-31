@@ -30,8 +30,8 @@ struct StubSampler;
 impl Sampler for StubSampler {
     fn probe(&mut self, counter: u64) -> OsContextState {
         let ts = chrono::Utc::now().to_rfc3339();
-        let app = if counter % 3 == 0 { "firefox" } else { "vscode" };
-        let window = if counter % 5 == 0 { "README.md" } else { "Editor" };
+        let app = if counter.is_multiple_of(3) { "firefox" } else { "vscode" };
+        let window = if counter.is_multiple_of(5) { "README.md" } else { "Editor" };
         OsContextState {
             ts,
             app: app.to_string(),
@@ -65,7 +65,7 @@ static SESSIONS: Lazy<Mutex<HashMap<String, Session>>> = Lazy::new(|| Mutex::new
 
 /// Spawns a background thread that pushes OsContextState into a channel.
 #[pyfunction]
-pub fn start_session(_py: Python, session_id: &str, cfg: &PyDict) -> PyResult<()> {
+pub fn start_session(_py: Python<'_>, session_id: &str, cfg: &Bound<'_, PyDict>) -> PyResult<()> {
     let sid = session_id.to_string();
     let poll_interval_ms = cfg
         .get_item("poll_interval_ms")?
@@ -189,12 +189,12 @@ mod tests {
     #[test]
     fn start_stop_cycle() {
         let sid = "test-session-1";
-        pyo3::Python::with_gil(|py| {
+        pyo3::Python::attach(|py| {
             let cfg = PyDict::new(py);
             cfg.set_item("poll_interval_ms", 10u64).unwrap();
 
             // Start session
-            start_session(py, sid, cfg).unwrap();
+            start_session(py, sid, &cfg).unwrap();
 
             // Allow some events to be generated
             std::thread::sleep(std::time::Duration::from_millis(50));

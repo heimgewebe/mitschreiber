@@ -13,7 +13,7 @@ use std::error::Error;
 fn parse_wm_class(raw: &[u8]) -> String {
     raw.split(|&b| b == 0)
         .filter(|p| !p.is_empty())
-        .last()
+        .next_back()
         .map(|cls| String::from_utf8_lossy(cls).into_owned())
         .unwrap_or_default()
 }
