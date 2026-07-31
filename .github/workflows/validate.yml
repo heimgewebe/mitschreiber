@@ -50,7 +50,7 @@ jobs:
   validate-embed:
     needs: contract-sanity
     # Keep the pinned SHA in sync with CONTRACTS_REF above.
-    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
+    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@ec7cdbb6e8b4d76a17b3bdc8bdc2b1c590b6a0d2
     with:
       jsonl_paths_list: |
         fixtures/mitschreiber/embed*.jsonl
