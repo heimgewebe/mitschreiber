@@ -1,45 +1,39 @@
-"""
-Demo/test embedding module using deterministic hash-based pseudo-embeddings.
-
-This module provides zero-dependency embeddings for testing and demo purposes.
-Uses BLAKE2b hashing to create deterministic pseudo-embeddings.
-
-For production ML-based embeddings, see embed.py instead.
-For the simple inline implementation, see session.py's _emit_embed().
-"""
+"""Deterministic, zero-dependency demo embeddings."""
 from __future__ import annotations
+
 import hashlib
 import re
 from typing import List
 
 _WORD_RE = re.compile(r"[A-Za-zÀ-ÿ0-9_]{3,}")
 
+
 def _hash32(text: str, dim: int = 32) -> List[float]:
-    """
-    Deterministic, zero-dep pseudo-embedding in [-0.5, 0.5).
-    Using BLAKE2b so it's stable across machines and Python versions.
-    """
+    """Return a stable pseudo-embedding in [-0.5, 0.5)."""
     if dim > 64:
         raise ValueError("dim must be <= 64 for blake2b digest sizing")
-    h = hashlib.blake2b(text.encode("utf-8"), digest_size=dim).digest()
-    # Map each byte (0..255) -> float in [-0.5, 0.5)
-    return [b / 255.0 - 0.5 for b in h]
+    digest = hashlib.blake2b(text.encode("utf-8"), digest_size=dim).digest()
+    return [byte / 255.0 - 0.5 for byte in digest]
+
 
 def simple_keyphrases(text: str, top_n: int = 5) -> List[str]:
-    """
-    Crude keyphrase extractor: lowercase tokens >=3 chars, keep first occurrences.
-    Stable and fast; replace with a real extractor later.
-    """
+    """Extract stable first-occurrence tokens for demo records."""
     seen = set()
     phrases: List[str] = []
-    for m in _WORD_RE.finditer(text.lower()):
-        tok = m.group(0)
-        if tok not in seen:
-            seen.add(tok)
-            phrases.append(tok)
+    for match in _WORD_RE.finditer(text.lower()):
+        token = match.group(0)
+        if token not in seen:
+            seen.add(token)
+            phrases.append(token)
         if len(phrases) >= top_n:
             break
     return phrases
+
+
+def _schema_keyphrases(phrases: List[str]) -> List[str]:
+    bounded = [phrase.strip()[:96] for phrase in phrases if phrase.strip()]
+    return bounded[:64] or ["context"]
+
 
 def build_embed_record(
     *,
@@ -50,20 +44,24 @@ def build_embed_record(
     text: str,
     dim: int = 32,
 ) -> dict:
+    """Construct a contract-valid ``os.context.text.embed`` record.
+
+    ``session`` remains an input for API compatibility but is intentionally not
+    persisted because the canonical embed contract is privacy-minimal.
     """
-    Construct a schema-shaped os.context.text.embed record.
-    """
-    # Hash of the *content* we embed (helps dedup downstream)
-    sha_hex = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    return {
+    _ = session
+    app_value = str(app or "").strip()[:128] or "unknown"
+    window_value = str(window or "").strip()[:512]
+    record = {
         "ts": ts_iso,
-        "source": "os.context.text.embed",
-        "session": session,
-        "app": app,
-        "window": window,
-        "keyphrases": simple_keyphrases(text),
+        "source": "mitschreiber",
+        "app": app_value,
+        "keyphrases": _schema_keyphrases(simple_keyphrases(text)),
         "embedding": _hash32(text, dim=dim),
-        "hash_id": f"sha256:{sha_hex}",
+        "hash_id": hashlib.sha256(text.encode("utf-8")).hexdigest(),
         "privacy": {"raw_retained": False},
-        "meta": {"model": "hash32-demo"},
+        "tags": ["model:hash32-demo"],
     }
+    if window_value:
+        record["window"] = window_value
+    return record

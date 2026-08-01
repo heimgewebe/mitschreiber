@@ -6,7 +6,7 @@ dev:
 emit-fixtures:
     @mkdir -p fixtures/mitschreiber
     @cat <<'EOF' > fixtures/mitschreiber/embed.demo.jsonl
-    {"ts":"2025-01-01T12:00:00Z","source":"os.context.text.embed","session":"demo","app":"vscode","window":"README.md – mitschreiber","keyphrases":["mitschreiber","privacy","context"],"embedding":[0.012,-0.034,0.056,0.078,0.031,-0.045,0.022,0.007],"hash_id":"sha256:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","privacy":{"raw_retained":false},"meta":{"model":"demo-embedding"}}
+    {"ts":"2025-01-01T12:00:00Z","source":"mitschreiber","app":"vscode","window":"README.md – mitschreiber","keyphrases":["mitschreiber","privacy","context"],"embedding":[0.012,-0.034,0.056,0.078,0.031,-0.045,0.022,0.007],"hash_id":"0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef","privacy":{"raw_retained":false},"tags":["model:demo-embedding"]}
     EOF
     @echo 'OK: fixtures/mitschreiber/embed.demo.jsonl angelegt'
 
@@ -18,6 +18,7 @@ default: lint
 
 test:
     cargo test --workspace --all-targets
+    uv run --group dev pytest -q
 
 # Lokaler Helper: Schnelltests & Linter – sicher mit Null-Trennung und Quoting
 lint:

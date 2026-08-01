@@ -79,19 +79,18 @@ uv run mitschreiber start --clipboard
 ```json
 {
   "ts": "2025-01-01T12:00:05Z",
-  "source": "os.context.text.embed",
-  "session": "uuid",
+  "source": "mitschreiber",
   "app": "vscode",
   "window": "README.md — mitschreiber",
   "keyphrases": ["mitschreiber", "privacy", "context"],
-  "embedding": [0.012, -0.034, 0.056, ...],
-  "hash_id": "sha256:...",
-  "privacy": { "opt_in_retained": true },
-  "meta": { "model": "demo-embedding" }
+  "embedding": [0.012, -0.034, 0.056, 0.078, 0.031, -0.045, 0.022, 0.007],
+  "hash_id": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+  "privacy": { "raw_retained": false },
+  "tags": ["model:demo-embedding"]
 }
 ```
 
-> `privacy.opt_in_retained: true` kennzeichnet, dass die zugrunde liegenden Inhalte in dieser Session **mit explizitem Opt-in** gespeichert werden **dürfen**. Im Standard wäre es `false`.
+> Embed-Events enthalten absichtlich weder Session-ID noch Rohtext. `privacy.raw_retained: false` ist verpflichtend; ein Opt-in zur Rohdatenaufbewahrung ändert den Embed-Vertrag nicht.
 
 ---
 
