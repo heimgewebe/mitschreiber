@@ -1,7 +1,8 @@
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
+use crossbeam_channel::{bounded, Receiver, Sender};
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use std::collections::HashMap;
@@ -9,7 +10,6 @@ use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::thread::{self, JoinHandle};
 use std::time::Duration;
-use crossbeam_channel::{bounded, Sender, Receiver};
 
 #[cfg(feature = "x11")]
 use crate::x11::X11Sampler;
@@ -30,8 +30,16 @@ struct StubSampler;
 impl Sampler for StubSampler {
     fn probe(&mut self, counter: u64) -> OsContextState {
         let ts = chrono::Utc::now().to_rfc3339();
-        let app = if counter % 3 == 0 { "firefox" } else { "vscode" };
-        let window = if counter % 5 == 0 { "README.md" } else { "Editor" };
+        let app = if counter.is_multiple_of(3) {
+            "firefox"
+        } else {
+            "vscode"
+        };
+        let window = if counter.is_multiple_of(5) {
+            "README.md"
+        } else {
+            "Editor"
+        };
         OsContextState {
             ts,
             app: app.to_string(),
@@ -65,7 +73,7 @@ static SESSIONS: Lazy<Mutex<HashMap<String, Session>>> = Lazy::new(|| Mutex::new
 
 /// Spawns a background thread that pushes OsContextState into a channel.
 #[pyfunction]
-pub fn start_session(_py: Python, session_id: &str, cfg: &PyDict) -> PyResult<()> {
+pub fn start_session(_py: Python<'_>, session_id: &str, cfg: &Bound<'_, PyDict>) -> PyResult<()> {
     let sid = session_id.to_string();
     let poll_interval_ms = cfg
         .get_item("poll_interval_ms")?
@@ -171,8 +179,12 @@ pub fn poll_state(_py: Python, session_id: &str) -> PyResult<Vec<String>> {
         // Collect all available events from the channel
         let mut events = Vec::new();
         for state in session.rx.try_iter() {
-            let json = serde_json::to_string(&state)
-                .map_err(|e| PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!("JSON serialization error: {}", e)))?;
+            let json = serde_json::to_string(&state).map_err(|e| {
+                PyErr::new::<pyo3::exceptions::PyRuntimeError, _>(format!(
+                    "JSON serialization error: {}",
+                    e
+                ))
+            })?;
             events.push(json);
         }
         Ok(events)
@@ -189,12 +201,12 @@ mod tests {
     #[test]
     fn start_stop_cycle() {
         let sid = "test-session-1";
-        pyo3::Python::with_gil(|py| {
+        pyo3::Python::attach(|py| {
             let cfg = PyDict::new(py);
             cfg.set_item("poll_interval_ms", 10u64).unwrap();
 
             // Start session
-            start_session(py, sid, cfg).unwrap();
+            start_session(py, sid, &cfg).unwrap();
 
             // Allow some events to be generated
             std::thread::sleep(std::time::Duration::from_millis(50));
@@ -216,7 +228,10 @@ mod tests {
             stop_session(py, sid).unwrap();
 
             // Verify the session is gone
-            assert!(SESSIONS.lock().get(sid).is_none(), "Session was not removed after stopping");
+            assert!(
+                SESSIONS.lock().get(sid).is_none(),
+                "Session was not removed after stopping"
+            );
         });
     }
 
@@ -290,11 +305,15 @@ mod tests {
             window: "b".to_string(),
             clipboard: None,
         };
-        assert!(tx.try_send(state.clone()).is_ok(), "first send should succeed");
+        assert!(
+            tx.try_send(state.clone()).is_ok(),
+            "first send should succeed"
+        );
         let second = tx.try_send(state);
         assert!(
             matches!(second, Err(crossbeam_channel::TrySendError::Full(_))),
-            "expected Full on second send to a full channel, got {:?}", second,
+            "expected Full on second send to a full channel, got {:?}",
+            second,
         );
     }
 

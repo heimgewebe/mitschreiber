@@ -1,18 +1,18 @@
 # Contracts
 
-Die Schemas liegen zentral im **metarepo** (gepinnt auf Commit `78674c7159fb4c623cf3d65e978e4e5d6ca699bb`):
+Die Schemas liegen zentral im **metarepo** (gepinnt auf Commit `f3524f9b040be957cfead5b80f7a683d0ea6df72`):
 
 | Event | Schema-Datei | Persistenz |
 |--------|---------------|------------|
-| `os.context.state` | [metarepo/contracts/os.context.state.schema.json](https://github.com/heimgewebe/metarepo/blob/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.state.schema.json) | dauerhaft |
-| `os.context.text.redacted` | [metarepo/contracts/os.context.text.redacted.schema.json](https://github.com/heimgewebe/metarepo/blob/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.redacted.schema.json) | flüchtig |
-| `os.context.text.embed` | [metarepo/contracts/os.context.text.embed.schema.json](https://github.com/heimgewebe/metarepo/blob/78674c7159fb4c623cf3d65e978e4e5d6ca699bb/contracts/os.context.text.embed.schema.json) | dauerhaft |
+| `os.context.state` | [metarepo/contracts/os.context.state.schema.json](https://github.com/heimgewebe/metarepo/blob/f3524f9b040be957cfead5b80f7a683d0ea6df72/contracts/os.context.state.schema.json) | dauerhaft |
+| `os.context.text.redacted` | [metarepo/contracts/os.context.text.redacted.schema.json](https://github.com/heimgewebe/metarepo/blob/f3524f9b040be957cfead5b80f7a683d0ea6df72/contracts/os.context.text.redacted.schema.json) | flüchtig |
+| `os.context.text.embed` | [metarepo/contracts/os.context.text.embed.schema.json](https://github.com/heimgewebe/metarepo/blob/f3524f9b040be957cfead5b80f7a683d0ea6df72/contracts/os.context.text.embed.schema.json) | dauerhaft |
 
 Validierung per Reusable-Workflow:
 
 ```yaml
 env:
-  CONTRACTS_REF: 78674c7159fb4c623cf3d65e978e4e5d6ca699bb
+  CONTRACTS_REF: f3524f9b040be957cfead5b80f7a683d0ea6df72
 
 jobs:
   contract-sanity:
@@ -40,11 +40,9 @@ jobs:
     needs: contract-sanity
     timeout-minutes: 10
     # Keep the pinned SHA in sync with CONTRACTS_REF above.
-    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@78674c7159fb4c623cf3d65e978e4e5d6ca699bb
+    uses: heimgewebe/metarepo/.github/workflows/reusable-validate-jsonl.yml@f3524f9b040be957cfead5b80f7a683d0ea6df72
     with:
       jsonl_paths_list: |
         fixtures/mitschreiber/*.jsonl
-      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.state.schema.json
-```
-
+      schema_url: https://raw.githubusercontent.com/heimgewebe/metarepo/${{ env.CONTRACTS_REF }}/contracts/os.context.text.embed.schema.json
 ```

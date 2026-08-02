@@ -66,32 +66,27 @@ class WalWriter:
             fcntl.flock(self.file, fcntl.LOCK_UN)
 
 def _emit_embed(state_evt: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    """
-    STUB / PROTOTYPE
-    Generates a deterministic 'fake' embedding from the event state.
-    This is strictly for demo/testing purposes (Pipe-Integration & Schema)
-    and uses a SHA256 hash instead of a real ML model.
-
-    TODO: Replace with real local embedding model (e.g., via onnx/gguf).
-    """
-    # Minimaler Stub: bildet ein deterministisches kleines „Embedding“
-    # aus app+window Hash – genügt für Pipe-Integration & Schema-Form.
-    text = f"{state_evt.get('app','')}|{state_evt.get('window','')}"
-    h = hashlib.sha256(text.encode("utf-8")).hexdigest()
-    # Achtung: Demo-Embedding mit 8 Werten
-    vec = [((ord(c) % 17) - 8) / 100.0 for c in h[:8]]
-    return {
+    """Generate a deterministic, contract-valid demo embedding event."""
+    app = str(state_evt.get("app") or "").strip()[:128] or "unknown"
+    window = str(state_evt.get("window") or "").strip()[:512]
+    text = f"{app}|{window}"
+    hash_id = hashlib.sha256(text.encode("utf-8")).hexdigest()
+    vector = [((ord(char) % 17) - 8) / 100.0 for char in hash_id[:8]]
+    keyphrases = [part[:96] for part in (app, window) if part] or ["context"]
+    event: Dict[str, Any] = {
         "ts": now_iso(),
-        "source": "os.context.text.embed",
-        "session": state_evt["session"],
-        "app": state_evt.get("app"),
-        "window": state_evt.get("window"),
-        "keyphrases": [w for w in text.split("|") if w],
-        "embedding": vec,
-        "hash_id": f"sha256:{h}",
+        "source": "mitschreiber",
+        "app": app,
+        "keyphrases": keyphrases,
+        "embedding": vector,
+        "hash_id": hash_id,
         "privacy": {"raw_retained": False},
-        "meta": {"model": "demo-embedding-stub"}
+        "tags": ["model:demo-embedding-stub"],
     }
+    if window:
+        event["window"] = window
+    return event
+
 
 def run_session(session_id: str, embed: bool, clipboard: bool, poll_ms: int):
     if poll_ms <= 0:
