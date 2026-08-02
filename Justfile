@@ -18,7 +18,7 @@ default: lint
 
 test:
     cargo test --workspace --all-targets
-    uv run --group dev pytest -q
+    python -m pytest -q
 
 # Lokaler Helper: Schnelltests & Linter – sicher mit Null-Trennung und Quoting
 lint:
