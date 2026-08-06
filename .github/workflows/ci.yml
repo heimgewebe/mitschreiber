@@ -13,7 +13,7 @@ concurrency:
 jobs:
   ci:
     # Keep the pinned SHA in sync with documentation and CONTRACTS_REF in validate.yml.
-    uses: heimgewebe/metarepo/.github/workflows/reusable-ci.yml@f3524f9b040be957cfead5b80f7a683d0ea6df72
+    uses: heimgewebe/metarepo/.github/workflows/reusable-ci.yml@9c4caedec6f9e0fef4d1132838c8d8c24c0ba859
     with:
       run_lint: false
       run_tests: true
