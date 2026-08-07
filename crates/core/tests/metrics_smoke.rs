@@ -11,7 +11,7 @@
 //! Erwartung: Ein laufender mitschreiber-Server exponiert
 //! Prometheus-Metriken unter GET /metrics (Content-Type text/plain; version=0.0.4).
 
-use http::StatusCode;
+use reqwest::StatusCode;
 use reqwest::header::{ACCEPT, CONTENT_TYPE};
 use std::time::Duration;
 
