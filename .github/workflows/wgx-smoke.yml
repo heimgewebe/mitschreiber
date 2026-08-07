@@ -9,6 +9,7 @@ permissions:
     paths:
       - ".wgx/**"
       - "docs/wgx-konzept.md"
+      - ".github/workflows/wgx-smoke.yml"
 
 jobs:
   smoke:
